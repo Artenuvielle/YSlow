@@ -23,7 +23,7 @@ error:
 	$(error Invalid configuration, please check your inputs)
 endif
 
-SOURCEFILES := YSlow.cpp
+SOURCEFILES := backend_socket.cpp client_socket.cpp epollinterface.cpp Logger.cpp netutils.cpp server_socket.cpp YSlow.cpp
 EXTERNAL_LIBS := 
 EXTERNAL_LIBS_COPIED := $(foreach lib, $(EXTERNAL_LIBS),$(BINARYDIR)/$(notdir $(lib)))
 
