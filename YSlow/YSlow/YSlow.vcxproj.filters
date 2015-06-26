@@ -31,13 +31,10 @@
     <ClCompile Include="netutils.cpp">
       <Filter>Source files</Filter>
     </ClCompile>
-    <ClCompile Include="client_socket.cpp">
-      <Filter>Source files</Filter>
-    </ClCompile>
-    <ClCompile Include="backend_socket.cpp">
-      <Filter>Source files</Filter>
-    </ClCompile>
     <ClCompile Include="Logger.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="connection.cpp">
       <Filter>Source files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -60,13 +57,10 @@
     <ClInclude Include="netutils.h">
       <Filter>Header files</Filter>
     </ClInclude>
-    <ClInclude Include="client_socket.h">
-      <Filter>Header files</Filter>
-    </ClInclude>
-    <ClInclude Include="backend_socket.h">
-      <Filter>Header files</Filter>
-    </ClInclude>
     <ClInclude Include="Logger.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="connection.h">
       <Filter>Header files</Filter>
     </ClInclude>
   </ItemGroup>

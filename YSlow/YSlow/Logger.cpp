@@ -21,7 +21,7 @@ class LoggingStream : public ostream {
 				}
 
 				int sync() {
-					if (Logger::getLoggingLevel() >= m_data.level) {
+					if (Logger::getLoggingLevel() <= m_data.level) {
 						m_data.stream << m_data.name << ": " << str();
 					}
 					str("");
@@ -34,7 +34,11 @@ class LoggingStream : public ostream {
 		~LoggingStream() { delete rdbuf(); }
 };
 
+#ifdef DEBUG 
+int Logger::logging_level = LOG_LEVEL_ALL;
+#else
 int Logger::logging_level = LOG_LEVEL_WARN;
+#endif
 
 LoggingStream debug_stream({ LOG_LEVEL_DEBUG, "Debug", cout });
 LoggingStream info_stream({ LOG_LEVEL_INFO, "Info", cout });
@@ -46,12 +50,10 @@ ostream& Logger::info = info_stream;
 ostream& Logger::warn = warn_stream;
 ostream& Logger::error = error_stream;
 
-void Logger::setLoggingLevel(int new_level)
-{
+void Logger::setLoggingLevel(int new_level) {
 	logging_level = new_level;
 }
 
-int Logger::getLoggingLevel()
-{
+int Logger::getLoggingLevel() {
 	return logging_level;
 }

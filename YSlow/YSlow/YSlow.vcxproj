@@ -63,8 +63,7 @@
   <ItemDefinitionGroup>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="backend_socket.cpp" />
-    <ClCompile Include="client_socket.cpp" />
+    <ClCompile Include="connection.cpp" />
     <ClCompile Include="epollinterface.cpp" />
     <ClCompile Include="Logger.cpp" />
     <ClCompile Include="netutils.cpp" />
@@ -77,8 +76,7 @@
     <None Include="release.mak" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="backend_socket.h" />
-    <ClInclude Include="client_socket.h" />
+    <ClInclude Include="connection.h" />
     <ClInclude Include="epollinterface.h" />
     <ClInclude Include="Logger.h" />
     <ClInclude Include="netutils.h" />

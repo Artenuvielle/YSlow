@@ -1,5 +1,3 @@
-#include <iostream>
-
 #include <stdlib.h>
 #include <signal.h>
 #include <sys/epoll.h>
@@ -14,7 +12,7 @@ using namespace std;
 char* get_config_opt(lua_State* L, char* name) {
 	lua_getglobal(L, name);
 	if (!lua_isstring(L, -1)) {
-		cerr << name << " must be a string" << name;
+		Logger::error << name << " must be a string" << endl;
 		exit(1);
 	}
 	return (char*)lua_tostring(L, -1);
@@ -22,7 +20,7 @@ char* get_config_opt(lua_State* L, char* name) {
 
 int main(int argc, char *argv[]) {
 	if (argc != 2) {
-		cerr << "Usage: " << argv[0] << " <config_file>" << endl;
+		Logger::error << "Usage: " << argv[0] << " <config_file>" << endl;
 		exit(1);
 	}
 	cout << "---------------------------------------------" << endl;
@@ -32,7 +30,7 @@ int main(int argc, char *argv[]) {
 	lua_State *L = lua_open();
 
 	if (luaL_dofile(L, argv[1]) != 0) {
-		Logger::error << "Error parsing config file: " << lua_tostring(L, -1);
+		Logger::error << "Error parsing config file: " << lua_tostring(L, -1) << endl;
 		exit(1);
 	}
 	char* server_port_str = get_config_opt(L, "listenPort");
@@ -41,18 +39,12 @@ int main(int argc, char *argv[]) {
 
 	signal(SIGPIPE, SIG_IGN);
 
-	int epoll_fd = epoll_create1(0);
-	if (epoll_fd == -1) {
-		Logger::error << "Couldn't create epoll FD" << endl;
-		exit(1);
-	}
+	epoll_init();
 
-	epoll_event_handler* server_socket_event_handler;
-	server_socket_event_handler = create_server_socket_handler(epoll_fd, server_port_str, backend_addr, backend_port_str);
-	add_epoll_handler(epoll_fd, server_socket_event_handler, EPOLLIN);
+	create_server_socket_handler(server_port_str, backend_addr, backend_port_str);
 
-	Logger::info << "Started server. Listening on port " << server_port_str << "." << endl;
-	do_reactor_loop(epoll_fd);
+	Logger::info << "Started.  Listening on port " << server_port_str << "." << endl;
+	epoll_do_reactor_loop();
 
 	return 0;
 }

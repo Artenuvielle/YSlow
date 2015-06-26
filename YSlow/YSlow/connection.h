@@ -1,0 +1,19 @@
+#pragma once
+
+struct data_buffer_entry;
+
+struct connection_closure {
+	void(*on_read)(void* closure, char* buffer, int len);
+	void* on_read_closure;
+
+	void(*on_close)(void* closure);
+	void* on_close_closure;
+
+	data_buffer_entry* write_buffer;
+};
+
+extern void connection_write(epoll_event_handler* self, char* data, int len);
+
+extern void connection_close(epoll_event_handler* self);
+
+extern epoll_event_handler* create_connection(int connection_fd);

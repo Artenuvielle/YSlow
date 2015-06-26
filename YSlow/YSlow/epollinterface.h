@@ -1,13 +1,17 @@
 #pragma once
 
-#include <stdint.h>
-
 struct epoll_event_handler {
 	int fd;
-	void (*handle)(epoll_event_handler*, uint32_t);
+	void(*handle)(struct epoll_event_handler*, uint32_t);
 	void* closure;
 };
 
-extern void add_epoll_handler(int epoll_fd, epoll_event_handler* handler, uint32_t event_mask);
+extern void epoll_init();
 
-extern void do_reactor_loop(int epoll_fd);
+extern void epoll_add_handler(epoll_event_handler* handler, uint32_t event_mask);
+
+extern void epoll_remove_handler(epoll_event_handler* handler);
+
+extern void epoll_add_to_free_list(void* block);
+
+extern void epoll_do_reactor_loop();
