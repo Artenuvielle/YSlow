@@ -22,19 +22,19 @@
     <ClCompile Include="YSlow.cpp">
       <Filter>Source files</Filter>
     </ClCompile>
-    <ClCompile Include="epollinterface.cpp">
-      <Filter>Source files</Filter>
-    </ClCompile>
-    <ClCompile Include="server_socket.cpp">
-      <Filter>Source files</Filter>
-    </ClCompile>
-    <ClCompile Include="netutils.cpp">
-      <Filter>Source files</Filter>
-    </ClCompile>
     <ClCompile Include="Logger.cpp">
       <Filter>Source files</Filter>
     </ClCompile>
-    <ClCompile Include="connection.cpp">
+    <ClCompile Include="ProcessingPipeline.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="EPoll.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="ConnectionHandler.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="Network.cpp">
       <Filter>Source files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -48,20 +48,28 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="epollinterface.h">
-      <Filter>Header files</Filter>
-    </ClInclude>
-    <ClInclude Include="server_socket.h">
-      <Filter>Header files</Filter>
-    </ClInclude>
-    <ClInclude Include="netutils.h">
-      <Filter>Header files</Filter>
-    </ClInclude>
     <ClInclude Include="Logger.h">
       <Filter>Header files</Filter>
     </ClInclude>
-    <ClInclude Include="connection.h">
+    <ClInclude Include="resource.h">
       <Filter>Header files</Filter>
     </ClInclude>
+    <ClInclude Include="ProcessingPipeline.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="EPoll.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="ConnectionHandler.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="Network.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="YSlow.rc">
+      <Filter>Resource files</Filter>
+    </ResourceCompile>
   </ItemGroup>
 </Project>

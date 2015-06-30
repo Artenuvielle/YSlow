@@ -9,32 +9,32 @@ struct LoggingLevelData {
 };
 
 class LoggingStream : public ostream {
+private:
+	class LoggingBuffer : public stringbuf {
 	private:
-		class LoggingBuffer : public stringbuf {
-			private:
-				LoggingLevelData m_data;
-			public:
-				LoggingBuffer(const LoggingLevelData& data) : m_data(data) {}
-
-				~LoggingBuffer() {
-					pubsync();
-				}
-
-				int sync() {
-					if (Logger::getLoggingLevel() <= m_data.level) {
-						m_data.stream << m_data.name << ": " << str();
-					}
-					str("");
-					return !m_data.stream;
-				}
-		};
-
+		LoggingLevelData m_data;
 	public:
-		LoggingStream(const LoggingLevelData& data) : ostream(new LoggingBuffer(data)) {}
-		~LoggingStream() { delete rdbuf(); }
+		LoggingBuffer(const LoggingLevelData& data) : m_data(data) {}
+
+		~LoggingBuffer() {
+			pubsync();
+		}
+
+		int sync() {
+			if (Logger::getLoggingLevel() <= m_data.level) {
+				m_data.stream << m_data.name << ": " << str();
+			}
+			str("");
+			return !m_data.stream;
+		}
+	};
+
+public:
+	LoggingStream(const LoggingLevelData& data) : ostream(new LoggingBuffer(data)) {}
+	~LoggingStream() { delete rdbuf(); }
 };
 
-#ifdef DEBUG 
+#ifdef DEBUG
 int Logger::logging_level = LOG_LEVEL_ALL;
 #else
 int Logger::logging_level = LOG_LEVEL_WARN;

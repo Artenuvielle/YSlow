@@ -63,11 +63,11 @@
   <ItemDefinitionGroup>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="connection.cpp" />
-    <ClCompile Include="epollinterface.cpp" />
+    <ClCompile Include="ConnectionHandler.cpp" />
+    <ClCompile Include="EPoll.cpp" />
+    <ClCompile Include="Network.cpp" />
     <ClCompile Include="Logger.cpp" />
-    <ClCompile Include="netutils.cpp" />
-    <ClCompile Include="server_socket.cpp" />
+    <ClCompile Include="ProcessingPipeline.cpp" />
     <ClCompile Include="YSlow.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -76,11 +76,15 @@
     <None Include="release.mak" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="connection.h" />
-    <ClInclude Include="epollinterface.h" />
+    <ClInclude Include="ConnectionHandler.h" />
+    <ClInclude Include="EPoll.h" />
+    <ClInclude Include="Network.h" />
     <ClInclude Include="Logger.h" />
-    <ClInclude Include="netutils.h" />
-    <ClInclude Include="server_socket.h" />
+    <ClInclude Include="ProcessingPipeline.h" />
+    <ClInclude Include="resource.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="YSlow.rc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
