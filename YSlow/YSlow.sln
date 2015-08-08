@@ -4,6 +4,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 VisualStudioVersion = 14.0.22823.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "YSlow", "YSlow\YSlow.vcxproj", "{09185DC6-D2BC-4BF2-B44D-CA6F47ED66C8}"
+	ProjectSection(ProjectDependencies) = postProject
+		{6A07BC5B-4E53-4B95-B941-AC899B9EDFA6} = {6A07BC5B-4E53-4B95-B941-AC899B9EDFA6}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "httpxx", "httpxx\httpxx.vcxproj", "{6A07BC5B-4E53-4B95-B941-AC899B9EDFA6}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +20,10 @@ Global
 		{09185DC6-D2BC-4BF2-B44D-CA6F47ED66C8}.Debug|x86.Build.0 = Debug|Win32
 		{09185DC6-D2BC-4BF2-B44D-CA6F47ED66C8}.Release|x86.ActiveCfg = Release|Win32
 		{09185DC6-D2BC-4BF2-B44D-CA6F47ED66C8}.Release|x86.Build.0 = Release|Win32
+		{6A07BC5B-4E53-4B95-B941-AC899B9EDFA6}.Debug|x86.ActiveCfg = Debug|Win32
+		{6A07BC5B-4E53-4B95-B941-AC899B9EDFA6}.Debug|x86.Build.0 = Debug|Win32
+		{6A07BC5B-4E53-4B95-B941-AC899B9EDFA6}.Release|x86.ActiveCfg = Release|Win32
+		{6A07BC5B-4E53-4B95-B941-AC899B9EDFA6}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

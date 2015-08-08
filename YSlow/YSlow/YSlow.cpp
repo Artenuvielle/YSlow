@@ -1,6 +1,5 @@
 #include <stdlib.h>
 #include <signal.h>
-#include <sys/epoll.h>
 #include <lua.hpp>
 
 #include "EPoll.h"
@@ -9,13 +8,13 @@
 
 using namespace std;
 
-char* get_config_opt(lua_State* L, char* name) {
-    lua_getglobal(L, name);
+char* get_config_opt(lua_State* L, string name) {
+    lua_getglobal(L, name.c_str());
     if (!lua_isstring(L, -1)) {
         Logger::error << name << " must be a string" << endl;
         exit(1);
     }
-    return (char*)lua_tostring(L, -1);
+    return const_cast<char*>(lua_tostring(L, -1));
 }
 
 int main(int argc, char *argv[]) {
@@ -48,8 +47,6 @@ int main(int argc, char *argv[]) {
     ProcessingPipeline* main_pipeline = new ProcessingPipeline(pipeline_data);
     main_pipeline->setupPipeline();
     delete main_pipeline;
-
-    //create_server_socket_handler(server_port_str, backend_address, backend_port_str);
 
     return 0;
 }

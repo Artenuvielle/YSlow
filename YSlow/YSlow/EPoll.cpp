@@ -21,7 +21,7 @@ EPollManager::~EPollManager() {
     ProcessFreeingList();
 }
 
-void EPollManager::addEventHandler(EPollEventHandler* handler, uint32_t event_mask) {
+void EPollManager::addEventHandler(EPollEventHandler* handler, u_int32_t event_mask) {
     epoll_event event;
 
     memset(&event, 0, sizeof(epoll_event));
@@ -52,7 +52,7 @@ void EPollManager::executePollingLoop() {
 
         epoll_wait(epoll_fd, &current_epoll_event, 1, -1);
         handler = (EPollEventHandler*)current_epoll_event.data.ptr;
-        uint32_t event = current_epoll_event.events;
+        u_int32_t event = current_epoll_event.events;
         handler->handleEPollEvent(event);
 
         ProcessFreeingList();

@@ -1,8 +1,9 @@
 #pragma once
+#include "../httpxx/BufferedMessage.hpp"
 
+class ClientSocket;
 class FrontendServer;
 class BackendServer;
-class ClientSocket;
 class EPollManager;
 
 struct ProcessingPipelineData {
@@ -17,22 +18,7 @@ enum ProcessingPipelinePacketType {
     PIPELINE_RESPONSE
 };
 
-class ProcessingPipelinePacket {
-    public:
-        ProcessingPipelinePacket(ProcessingPipelinePacketType v_type);
-        void setPacketType(ProcessingPipelinePacketType v_type);
-        void setPacketData(char* v_data, int v_length);
-        void setClientSocket(ClientSocket* socket);
-        char* getPacketData();
-        int getPacketDataLength();
-        ProcessingPipelinePacketType getPacketType();
-        ClientSocket* getClientSocket();
-    private:
-        ProcessingPipelinePacketType type;
-        ClientSocket* client_socket;
-        char* data;
-        int length;
-};
+class ProcessingPipelinePacket;
 
 class PipelineProcessor {
     public:
@@ -44,13 +30,13 @@ class PipelineProcessor {
 
 class RequestPipelineProcessor : public PipelineProcessor {
     public:
-        PipelineProcessor* processAndGetNextProcessor(ProcessingPipelinePacket* data);
+        PipelineProcessor* processAndGetNextProcessor(ProcessingPipelinePacket* data) override;
         virtual PipelineProcessor* processRequest(ProcessingPipelinePacket* data) = 0;
 };
 
 class ResponsePipelineProcessor : public PipelineProcessor {
     public:
-        PipelineProcessor* processAndGetNextProcessor(ProcessingPipelinePacket* data);
+        PipelineProcessor* processAndGetNextProcessor(ProcessingPipelinePacket* data) override;
         virtual PipelineProcessor* processResponse(ProcessingPipelinePacket* data) = 0;
 };
 
@@ -58,8 +44,29 @@ class ClientConnectionModule;
 
 class FirstPipelineProcessor : public PipelineProcessor {
     public:
-        PipelineProcessor* processAndGetNextProcessor(ProcessingPipelinePacket* data);
+        PipelineProcessor* processAndGetNextProcessor(ProcessingPipelinePacket* data) override;
         virtual void startPipelineProcess(ProcessingPipelinePacket* data) = 0;
+};
+
+class ProcessingPipelinePacket {
+    public:
+        ProcessingPipelinePacket(ProcessingPipelinePacketType v_type);
+        void setPacketType(ProcessingPipelinePacketType v_type);
+        void setPacketRequestData(http::BufferedRequest* v_data);
+        void setPacketResponseData(http::BufferedResponse* v_data);
+        void setClientSocket(ClientSocket* socket);
+        void setFirstPipelineProcessor(FirstPipelineProcessor* v_processor);
+        http::BufferedRequest* getPacketRequestData();
+        http::BufferedResponse* getPacketResponseData();
+        ProcessingPipelinePacketType getPacketType();
+        ClientSocket* getClientSocket();
+        FirstPipelineProcessor* getFirstPipelineProcessor();
+    private:
+        ProcessingPipelinePacketType type;
+        ClientSocket* client_socket = nullptr;
+        FirstPipelineProcessor* first_processor = nullptr;
+        http::BufferedRequest* request_data = nullptr;
+        http::BufferedResponse* response_data = nullptr;
 };
 
 class InitialClientReadHandler;
@@ -69,7 +76,7 @@ class ProcessingPipeline : FirstPipelineProcessor {
         ProcessingPipeline(ProcessingPipelineData* v_pipeline_data);
         ~ProcessingPipeline();
         void setupPipeline();
-        void startPipelineProcess(ProcessingPipelinePacket* data);
+        void startPipelineProcess(ProcessingPipelinePacket* data) override;
         ProcessingPipelineData* getProcessingPipelineData();
     private:
         ProcessingPipelineData* pipeline_data;

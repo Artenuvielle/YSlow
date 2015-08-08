@@ -1,9 +1,8 @@
-#include <stdint.h>
-#include <stdlib.h>
-
 #include "Logger.h"
 #include "ProcessingPipeline.h"
 #include "ConnectionHandler.h"
+#include "../httpxx/Response.hpp"
+#include "../httpxx/ResponseBuilder.hpp"
 
 using namespace std;
 
@@ -20,13 +19,24 @@ HTTPClientConnectionModule::HTTPClientConnectionModule(ProcessingPipelineData* p
 HTTPClientConnectionModule::~HTTPClientConnectionModule() {
 }
 
-ProcessingPipelinePacket* HTTPClientConnectionModule::handleRead(char* read_buffer, int bytes_read) {
+bool HTTPClientConnectionModule::handleRead(ProcessingPipelinePacket* packet, char* read_buffer, int bytes_read) {
     Logger::info << "Got: " << bytes_read << " bytes" << endl;
-    ProcessingPipelinePacket* packet_data = new ProcessingPipelinePacket(PIPELINE_REQUEST);
-    packet_data->setPacketData(read_buffer, bytes_read / sizeof(char));
-    return packet_data;
+    http::BufferedRequest* current_request = packet->getPacketRequestData();
+    if (current_request == nullptr) {
+        current_request = new http::BufferedRequest();
+        packet->setPacketRequestData(current_request);
+    }
+    current_request->feed(read_buffer, bytes_read);
+    return current_request->complete();
 }
 
-string HTTPClientConnectionModule::handleWrite(ProcessingPipelinePacket * packet) {
+string HTTPClientConnectionModule::handleWrite(ProcessingPipelinePacket* packet) {
+    if (packet->getPacketType() == PIPELINE_RESPONSE) {
+        http::BufferedResponse* response = packet->getPacketResponseData();
+        http::ResponseBuilder* responseBuilder = new http::ResponseBuilder(*response);
+        string ret = responseBuilder->to_string() + response->body();
+        delete responseBuilder;
+        return ret;
+    }
     return string();
 }

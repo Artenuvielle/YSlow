@@ -10,29 +10,40 @@ void ProcessingPipelinePacket::setPacketType(ProcessingPipelinePacketType v_type
     type = v_type;
 }
 
-void ProcessingPipelinePacket::setPacketData(char * v_data, int v_length) {
-    data = v_data;
-    length = v_length;
+void ProcessingPipelinePacket::setPacketRequestData(http::BufferedRequest* v_data) {
+    request_data = v_data;
+}
+
+void ProcessingPipelinePacket::setPacketResponseData(http::BufferedResponse* v_data) {
+    response_data = v_data;
 }
 
 void ProcessingPipelinePacket::setClientSocket(ClientSocket* socket) {
     client_socket = socket;
 }
 
-char* ProcessingPipelinePacket::getPacketData() {
-    return data;
+void ProcessingPipelinePacket::setFirstPipelineProcessor(FirstPipelineProcessor* v_processor) {
+    first_processor = v_processor;
 }
 
-int ProcessingPipelinePacket::getPacketDataLength() {
-    return length;
+http::BufferedRequest* ProcessingPipelinePacket::getPacketRequestData() {
+    return request_data;
+}
+
+http::BufferedResponse* ProcessingPipelinePacket::getPacketResponseData() {
+    return response_data;
 }
 
 ProcessingPipelinePacketType ProcessingPipelinePacket::getPacketType() {
     return type;
 }
 
-ClientSocket * ProcessingPipelinePacket::getClientSocket() {
+ClientSocket* ProcessingPipelinePacket::getClientSocket() {
     return client_socket;
+}
+
+FirstPipelineProcessor* ProcessingPipelinePacket::getFirstPipelineProcessor() {
+    return first_processor;
 }
 
 PipelineProcessor* RequestPipelineProcessor::processAndGetNextProcessor(ProcessingPipelinePacket* data) {
@@ -56,9 +67,17 @@ class InitialClientReadHandler : public ClientSocketReadHandler {
         void setConnectionModule(ClientConnectionModule* v_connection_module) {
             connection_module = v_connection_module;
         }
-        void handleRead(char* read_buffer, int bytes_read, ClientSocket* socket) {
-            ProcessingPipelinePacket* packet = connection_module->handleRead(read_buffer, bytes_read);
-            if (packet != nullptr) {
+        void handleRead(char* read_buffer, int bytes_read, ClientSocket* socket) override {
+            void* possible_packet = ClientSocketEventDataCommunicator::getEventData(socket);
+            ProcessingPipelinePacket* packet;
+            if (possible_packet == nullptr) {
+                packet = new ProcessingPipelinePacket(PIPELINE_REQUEST);
+                ClientSocketEventDataCommunicator::setEventData(socket, packet);
+            } else {
+                packet = static_cast<ProcessingPipelinePacket*>(possible_packet);
+            }
+            bool start_pipeline_process = connection_module->handleRead(packet, read_buffer, bytes_read);
+            if (start_pipeline_process) {
                 packet->setClientSocket(socket);
                 first_processor->startPipelineProcess(packet);
             }
@@ -91,7 +110,26 @@ void ProcessingPipeline::setupPipeline() {
 }
 
 void ProcessingPipeline::startPipelineProcess(ProcessingPipelinePacket* data) {
-    backend_server->processRequest(data);
+    PipelineProcessor* currentProcessor = nullptr;
+    bool is_response = false;
+    if (data->getPacketType() == PIPELINE_REQUEST) {
+        Logger::info << "Started request pipeline" << endl;
+        data->setFirstPipelineProcessor(this);
+        currentProcessor = backend_server;
+    } else {
+        Logger::info << "Started response pipeline" << endl;
+        currentProcessor = nullptr;
+        is_response = true;
+    }
+
+    while (currentProcessor != nullptr) {
+        currentProcessor = currentProcessor->processAndGetNextProcessor(data);
+    }
+
+    if (is_response) {
+        Logger::info << "Starting return to frontend server" << endl;
+        frontend_server->processResponse(data->getClientSocket(), client_connection_module->handleWrite(data));
+    }
 }
 
 ProcessingPipelineData * ProcessingPipeline::getProcessingPipelineData() {

@@ -13,6 +13,9 @@
 
 #define MAX_LISTEN_BACKLOG 4096
 #define BUFFER_SIZE 4096
+#include "../httpxx/Response.hpp"
+#include "../httpxx/RequestBuilder.hpp"
+#include "../httpxx/BufferedMessage.hpp"
 
 using namespace std;
 
@@ -64,7 +67,7 @@ class ServerSocket : public Socket {
 
             addrinfo* addrs;
             int getaddrinfo_error;
-            getaddrinfo_error = getaddrinfo(NULL, server_port_str, &hints, &addrs);
+            getaddrinfo_error = getaddrinfo(nullptr, server_port_str, &hints, &addrs);
             if (getaddrinfo_error != 0) {
                 Logger::info << "Couldn't find local host details: " << gai_strerror(getaddrinfo_error) << endl;
                 exit(1);
@@ -72,7 +75,7 @@ class ServerSocket : public Socket {
 
             addrinfo* addr_iterator;
             int temporary_socket_file_descriptor;
-            for (addr_iterator = addrs; addr_iterator != NULL; addr_iterator = addr_iterator->ai_next) {
+            for (addr_iterator = addrs; addr_iterator != nullptr; addr_iterator = addr_iterator->ai_next) {
                 temporary_socket_file_descriptor = socket(addr_iterator->ai_family, addr_iterator->ai_socktype, addr_iterator->ai_protocol);
                 if (temporary_socket_file_descriptor == -1) {
                     continue;
@@ -91,7 +94,7 @@ class ServerSocket : public Socket {
                 close(temporary_socket_file_descriptor);
             }
 
-            if (addr_iterator == NULL) {
+            if (addr_iterator == nullptr) {
                 Logger::info << "Couldn't bind" << endl;
                 exit(1);
             }
@@ -130,7 +133,7 @@ class ClientSocket : public Socket, EPollEventHandler {
             }
             epoll_manager->removeEventHandler(this);
         }
-        void handleEPollEvent(uint32_t events) {
+        void handleEPollEvent(uint32_t events) override {
             if (events & EPOLLOUT) {
                 onOutEvent();
             }
@@ -143,7 +146,10 @@ class ClientSocket : public Socket, EPollEventHandler {
                 onCloseEvent();
             }
         }
-        void send(char* data, int length) {
+        void send(string data) {
+            send(data.c_str(), data.size());
+        }
+        void send(const char* data, int length) {
             int written = 0;
             if (write_buffer == nullptr) {
                 written = write(getSocketFileDescriptor(), data, length);
@@ -167,7 +173,7 @@ class ClientSocket : public Socket, EPollEventHandler {
             int unwritten = length - written;
             DataBufferEntry* new_entry = new DataBufferEntry;
             new_entry->is_close_message = 0;
-            new_entry->data = (char*)malloc(unwritten);
+            new_entry->data = static_cast<char*>(malloc(unwritten));
             memcpy(new_entry->data, data + written, unwritten);
             new_entry->current_offset = 0;
             new_entry->len = unwritten;
@@ -184,7 +190,7 @@ class ClientSocket : public Socket, EPollEventHandler {
             return event_data;
         }
     private:
-        void* event_data;
+        void* event_data = nullptr;
         EPollManager* epoll_manager;
         ClientSocketReadHandler* read_handler = nullptr;
         ClientSocketCloseHandler* close_handler = nullptr;
@@ -193,7 +199,7 @@ class ClientSocket : public Socket, EPollEventHandler {
             int written;
             int to_write;
             DataBufferEntry* temp;
-            while (write_buffer != NULL) {
+            while (write_buffer != nullptr) {
                 if (write_buffer->is_close_message) {
                     closeConnection();
                     return;
@@ -225,10 +231,10 @@ class ClientSocket : public Socket, EPollEventHandler {
             }
         }
         void onInEvent() {
-            char read_buffer[BUFFER_SIZE];
+            char* read_buffer = new char[BUFFER_SIZE];
             int bytes_read;
 
-            while ((bytes_read = read(getFileDescriptor(), read_buffer, BUFFER_SIZE)) != -1 && bytes_read != 0) {
+            while ((bytes_read = read(getFileDescriptor(), read_buffer, BUFFER_SIZE - 1)) != -1 && bytes_read != 0) {
                 if (bytes_read == -1 && (errno == EAGAIN || errno == EWOULDBLOCK)) {
                     return;
                 }
@@ -242,6 +248,7 @@ class ClientSocket : public Socket, EPollEventHandler {
                     read_handler->handleRead(read_buffer, bytes_read, this);
                 }
             }
+            delete read_buffer;
         }
         void onCloseEvent() {
             if (write_buffer == nullptr) {
@@ -271,15 +278,23 @@ class ClientSocket : public Socket, EPollEventHandler {
         }
 };
 
+void ClientSocketEventDataCommunicator::setEventData(ClientSocket* socket, void* data) {
+    socket->setEventData(data);
+}
+
+void* ClientSocketEventDataCommunicator::getEventData(ClientSocket* socket) {
+    return socket->getEventData();
+}
+
 class FrontendEPollHandler : public EPollEventHandler {
     public:
         FrontendEPollHandler(int file_descriptor, NewConnectionHandler* v_connection_handler) : EPollEventHandler(file_descriptor) {
             connection_handler = v_connection_handler;
         }
-        void handleEPollEvent(uint32_t events) {
+        void handleEPollEvent(uint32_t events) override {
             int client_socket_fd;
             while (1) {
-                client_socket_fd = accept(getFileDescriptor(), NULL, NULL);
+                client_socket_fd = accept(getFileDescriptor(), nullptr, nullptr);
                 if (client_socket_fd == -1) {
                     if ((errno == EAGAIN) || (errno == EWOULDBLOCK)) {
                         break;
@@ -315,6 +330,14 @@ void FrontendServer::setClientConnectionHandler(ClientSocketReadHandler* connect
     response_handler = connection_module;
 }
 
+void FrontendServer::handleNewConnection(int file_descriptor) {
+    Logger::info << "Creating connection object for incoming connection..." << endl;
+    ClientSocket* client_socket = new ClientSocket(file_descriptor, epoll_manager, response_handler, this);
+    ClientSocketList* new_client_socket_list_element = new ClientSocketList;
+    *new_client_socket_list_element = { client_socket, client_list };
+    client_list = new_client_socket_list_element;
+}
+
 void FrontendServer::handleClose(ClientSocket* socket) {
     ClientSocketList* previous_client = nullptr;
     ClientSocketList* this_client;
@@ -334,25 +357,45 @@ void FrontendServer::handleClose(ClientSocket* socket) {
     Logger::info << "Frontend connection closed" << endl;
 }
 
-void FrontendServer::handleNewConnection(int file_descriptor) {
-    Logger::info << "Creating connection object for incoming connection..." << endl;
-    ClientSocket* client_socket = new ClientSocket(file_descriptor, epoll_manager, response_handler, this);
-    ClientSocketList* new_client_socket_list_element = new ClientSocketList;
-    *new_client_socket_list_element = { client_socket, client_list };
-    client_list = new_client_socket_list_element;
+void FrontendServer::processResponse(ClientSocket* socket, string packet) {
+    socket->send(packet);
 }
 
 class BackendResponseHandler : public ClientSocketReadHandler, public ClientSocketCloseHandler {
     public:
-        void handleRead(char* read_buffer, int bytes_read, ClientSocket* socket) {
-            Logger::info << "Got response from backend (" << bytes_read << " byte): " << read_buffer << endl;
-            ((ClientSocket*)socket->getEventData())->send(read_buffer, bytes_read);
+        void handleRead(char* read_buffer, int bytes_read, ClientSocket* socket) override {
+            Logger::info << "Got chunk from backend (" << bytes_read << " byte)" << endl;
+
+            ProcessingPipelinePacket* packet_data = static_cast<ProcessingPipelinePacket*>(socket->getEventData());
+
+            http::BufferedResponse* current_response = packet_data->getPacketResponseData();
+            if (current_response == nullptr) {
+                current_response = new http::BufferedResponse();
+                packet_data->setPacketResponseData(current_response);
+            }
+
+            int parsed_bytes = 0;
+            while (parsed_bytes < bytes_read) {
+                int parsed_bytes_in_cycle = current_response->feed(read_buffer + parsed_bytes, bytes_read - parsed_bytes);
+                parsed_bytes += parsed_bytes_in_cycle;
+            }
+
+            if (current_response->complete()) {
+                packet_data->setPacketType(PIPELINE_RESPONSE);
+                packet_data->getFirstPipelineProcessor()->startPipelineProcess(packet_data);
+            } else {
+                string out(read_buffer, bytes_read);
+                cout << out << endl;
+            }
+            //static_cast<ClientSocket*>(socket->getEventData())->send(read_buffer, bytes_read);
+
             //socket->requestClose();
-            // TODO: Evaluat whether to close this connection later
+            // TODO: Evaluate whether to close this connection later
             //((ClientSocket*)socket->getEventData())->requestClose();
         }
-        void handleClose(ClientSocket* socket) {
+        void handleClose(ClientSocket* socket) override {
             Logger::info << "Backend connection closed" << endl;
+            static_cast<ClientSocket*>(socket->getEventData())->requestClose();
         }
 };
 
@@ -369,12 +412,19 @@ BackendServer::~BackendServer() {
 PipelineProcessor* BackendServer::processRequest(ProcessingPipelinePacket* data) {
     int backend_socket_file_descriptor = initBackendConnection();
     ClientSocket* socket = new ClientSocket(backend_socket_file_descriptor, epoll_manager, response_handler, response_handler);
-    socket->setEventData(data->getClientSocket());
-    socket->send(data->getPacketData(), data->getPacketDataLength());
+    socket->setEventData(data);
+
+    http::BufferedRequest* request_packet = data->getPacketRequestData();
+    http::RequestBuilder* request_builder = new http::RequestBuilder(*request_packet);
+    string packet_string = request_builder->to_string() + request_packet->body();
+    delete request_builder;
+    socket->send(packet_string);
 
     ClientSocketList* new_client_socket_list_element = new ClientSocketList;
     *new_client_socket_list_element = { socket, client_list };
     client_list = new_client_socket_list_element;
+
+    return nullptr;
 }
 
 int BackendServer::initBackendConnection() {
@@ -397,7 +447,7 @@ int BackendServer::initBackendConnection() {
 
     struct addrinfo* addrs_iter;
     int backend_socket_file_descriptor;
-    for (addrs_iter = addrs; addrs_iter != NULL; addrs_iter = addrs_iter->ai_next) {
+    for (addrs_iter = addrs; addrs_iter != nullptr; addrs_iter = addrs_iter->ai_next) {
         backend_socket_file_descriptor = socket(addrs_iter->ai_family, addrs_iter->ai_socktype, addrs_iter->ai_protocol);
         if (backend_socket_file_descriptor == -1) {
             continue;
@@ -410,7 +460,7 @@ int BackendServer::initBackendConnection() {
         close(backend_socket_file_descriptor);
     }
 
-    if (addrs_iter == NULL) {
+    if (addrs_iter == nullptr) {
         Logger::error << "Couldn't connect to backend" << endl;
         exit(1);
     }

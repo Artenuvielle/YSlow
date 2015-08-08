@@ -1,11 +1,11 @@
 #pragma once
 
-class ProcessingPipelineData;
+struct ProcessingPipelineData;
 
 class ClientConnectionModule {
     public:
         ClientConnectionModule(ProcessingPipelineData* v_pipeline_data);
-        virtual ProcessingPipelinePacket* handleRead(char* read_buffer, int bytes_read) = 0;
+        virtual bool handleRead(ProcessingPipelinePacket* packet, char* read_buffer, int bytes_read) = 0;
         virtual string handleWrite(ProcessingPipelinePacket* packet) = 0;
     protected:
         ProcessingPipelineData* getPipelineData();
@@ -17,6 +17,6 @@ class HTTPClientConnectionModule : public ClientConnectionModule {
     public:
         HTTPClientConnectionModule(ProcessingPipelineData* pipeline);
         ~HTTPClientConnectionModule();
-        ProcessingPipelinePacket* handleRead(char* read_buffer, int bytes_read);
-        string handleWrite(ProcessingPipelinePacket* packet);
+        bool handleRead(ProcessingPipelinePacket* packet, char* read_buffer, int bytes_read) override;
+        string handleWrite(ProcessingPipelinePacket* packet) override;
 };

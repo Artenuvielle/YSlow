@@ -5,8 +5,16 @@
 struct ProcessingPipelineData;
 class FrontendEPollHandler;
 class EPollManager;
-class ClientSocket;
 class BackendResponseHandler;
+class ClientSocket;
+
+class ClientSocketEventDataCommunicator {
+    public:
+        static void setEventData(ClientSocket* socket, void* data);
+        static void* getEventData(ClientSocket* socket);
+    private:
+        ClientSocketEventDataCommunicator() {}
+};
 
 class ClientSocketReadHandler {
     public:
@@ -33,8 +41,9 @@ class FrontendServer : NewConnectionHandler, ClientSocketCloseHandler {
         FrontendServer(ProcessingPipelineData* pipeline_data);
         ~FrontendServer();
         void setClientConnectionHandler(ClientSocketReadHandler* handler);
-        void handleNewConnection(int file_descriptor);
-        void handleClose(ClientSocket* socket);
+        void handleNewConnection(int file_descriptor) override;
+        void handleClose(ClientSocket* socket) override;
+        void processResponse(ClientSocket* socket, string packet);
     private:
         EPollManager* epoll_manager;
         ClientSocketReadHandler* response_handler = nullptr;
@@ -42,11 +51,11 @@ class FrontendServer : NewConnectionHandler, ClientSocketCloseHandler {
         FrontendEPollHandler* event_handler;
 };
 
-class BackendServer : RequestPipelineProcessor {
+class BackendServer : public RequestPipelineProcessor {
     public:
         BackendServer(ProcessingPipelineData* pipeline_data);
         ~BackendServer();
-        PipelineProcessor* processRequest(ProcessingPipelinePacket* data);
+        PipelineProcessor* processRequest(ProcessingPipelinePacket* data) override;
     private:
         char* backend_server_host_string;
         char* backend_server_port_string;

@@ -24,7 +24,7 @@ error:
 endif
 
 SOURCEFILES := ConnectionHandler.cpp EPoll.cpp Network.cpp Logger.cpp ProcessingPipeline.cpp YSlow.cpp
-EXTERNAL_LIBS := 
+EXTERNAL_LIBS := ../httpxx/$(BINARYDIR)/httpxx.a
 EXTERNAL_LIBS_COPIED := $(foreach lib, $(EXTERNAL_LIBS),$(BINARYDIR)/$(notdir $(lib)))
 
 CFLAGS += $(COMMONFLAGS)
@@ -163,3 +163,6 @@ $(BINARYDIR)/%.o : %.cxx $(all_make_files) |$(BINARYDIR)
 	$(CC) $(CFLAGS) $(CXXFLAGS) -c $< -o $@ -MD -MF $(@:.o=.dep)
 
 #VisualGDB: GeneratedRules				#<--- All lines below are auto-generated
+$(BINARYDIR)/httpxx.a : ../httpxx/$(BINARYDIR)/httpxx.a
+	$(CP) ../httpxx/$(BINARYDIR)/httpxx.a $(BINARYDIR)/httpxx.a
+

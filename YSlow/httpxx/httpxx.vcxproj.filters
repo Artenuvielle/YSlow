@@ -1,0 +1,115 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source files">
+      <UniqueIdentifier>{83416f2a-3a14-4f71-a52b-ff9da53173d5}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header files">
+      <UniqueIdentifier>{b7a5c172-f541-4cc0-afab-d77e310dc5cd}</UniqueIdentifier>
+      <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource files">
+      <UniqueIdentifier>{a0d5d83d-eedf-4aa8-b46c-07337c263a5b}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav</Extensions>
+    </Filter>
+    <Filter Include="Make files">
+      <UniqueIdentifier>{c6beac02-f4f9-4478-bc4d-4139cf5a2b3f}</UniqueIdentifier>
+      <Extensions>*.mak</Extensions>
+    </Filter>
+    <Filter Include="http_parser">
+      <UniqueIdentifier>{22b1e7fb-7448-4e00-8cae-df52e5ea3f8a}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Makefile" />
+    <None Include="debug.mak">
+      <Filter>Make files</Filter>
+    </None>
+    <None Include="release.mak">
+      <Filter>Make files</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="BufferedMessage.hpp">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="Error.hpp">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="Flags.hpp">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="http.hpp">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="icompare.hpp">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="Message.hpp">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="MessageBuilder.hpp">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="Method.hpp">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="Request.hpp">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="RequestBuilder.hpp">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="Response.hpp">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="ResponseBuilder.hpp">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="Url.hpp">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="http_parser.h">
+      <Filter>http_parser</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Error.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="Flags.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="icompare.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="Message.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="MessageBuilder.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="Method.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="Request.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="RequestBuilder.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="Response.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="ResponseBuilder.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="Url.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="http_parser.c">
+      <Filter>http_parser</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>
