@@ -31,11 +31,6 @@ class NewConnectionHandler {
         virtual void handleNewConnection(int file_descriptor) = 0;
 };
 
-struct ClientSocketList {
-    ClientSocket* socket;
-    ClientSocketList* next_socket;
-};
-
 class FrontendServer : NewConnectionHandler, ClientSocketCloseHandler {
     public:
         FrontendServer(ProcessingPipelineData* pipeline_data);
@@ -47,20 +42,20 @@ class FrontendServer : NewConnectionHandler, ClientSocketCloseHandler {
     private:
         EPollManager* epoll_manager;
         ClientSocketReadHandler* response_handler = nullptr;
-        ClientSocketList* client_list = nullptr;
         FrontendEPollHandler* event_handler;
 };
 
 class BackendServer : public RequestPipelineProcessor {
     public:
-        BackendServer(ProcessingPipelineData* pipeline_data);
+        BackendServer(EPollManager* v_epoll_manager, const char* v_backend_server_host_string, const char* v_backend_server_port_string);
         ~BackendServer();
         PipelineProcessor* processRequest(ProcessingPipelinePacket* data) override;
+        void setInitializationData(string name, InitializationData* data) override;
+
     private:
-        char* backend_server_host_string;
-        char* backend_server_port_string;
+        string backend_server_host_string;
+        string backend_server_port_string;
         EPollManager* epoll_manager;
         BackendResponseHandler* response_handler = nullptr;
-        ClientSocketList* client_list = nullptr;
         int initBackendConnection();
 };

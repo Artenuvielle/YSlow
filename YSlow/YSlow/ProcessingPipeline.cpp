@@ -1,7 +1,6 @@
 #include "Logger.h"
 #include "EPoll.h"
 #include "Network.h"
-#include "ConnectionHandler.h"
 #include "ProcessingPipeline.h"
 
 ProcessingPipelinePacket::ProcessingPipelinePacket(ProcessingPipelinePacketType v_type) : type(v_type) {}
@@ -26,6 +25,10 @@ void ProcessingPipelinePacket::setFirstPipelineProcessor(FirstPipelineProcessor*
     first_processor = v_processor;
 }
 
+void ProcessingPipelinePacket::setFirstResponsePipelineProcessor(ResponsePipelineProcessor* v_processor) {
+    first_response_processor = v_processor;
+}
+
 http::BufferedRequest* ProcessingPipelinePacket::getPacketRequestData() {
     return request_data;
 }
@@ -46,12 +49,8 @@ FirstPipelineProcessor* ProcessingPipelinePacket::getFirstPipelineProcessor() {
     return first_processor;
 }
 
-PipelineProcessor* RequestPipelineProcessor::processAndGetNextProcessor(ProcessingPipelinePacket* data) {
-    return processRequest(data);
-}
-
-PipelineProcessor* ResponsePipelineProcessor::processAndGetNextProcessor(ProcessingPipelinePacket* data) {
-    return processResponse(data);
+PipelineProcessor* ProcessingPipelinePacket::getFirstResponsePipelineProcessor() {
+    return first_response_processor;
 }
 
 PipelineProcessor* FirstPipelineProcessor::processAndGetNextProcessor(ProcessingPipelinePacket* data) {
@@ -89,8 +88,7 @@ class InitialClientReadHandler : public ClientSocketReadHandler {
 
 ProcessingPipeline::ProcessingPipeline(ProcessingPipelineData* v_pipeline_data) : pipeline_data(v_pipeline_data) {
     frontend_server = new FrontendServer(pipeline_data);
-    backend_server = new BackendServer(pipeline_data);
-    client_connection_module = new HTTPClientConnectionModule(pipeline_data);
+    client_connection_module = pipeline_data->connection_module;
     client_read_handler = new InitialClientReadHandler(this);
     client_read_handler->setConnectionModule(client_connection_module);
     frontend_server->setClientConnectionHandler(client_read_handler);
@@ -101,7 +99,6 @@ ProcessingPipeline::~ProcessingPipeline() {
     delete client_connection_module;
     delete client_read_handler;
     delete frontend_server;
-    delete backend_server;
 }
 
 void ProcessingPipeline::setupPipeline() {
@@ -115,9 +112,10 @@ void ProcessingPipeline::startPipelineProcess(ProcessingPipelinePacket* data) {
     if (data->getPacketType() == PIPELINE_REQUEST) {
         Logger::info << "Started request pipeline" << endl;
         data->setFirstPipelineProcessor(this);
-        currentProcessor = backend_server;
+        currentProcessor = pipeline_data->pipeline_processors->find(pipeline_data->first_pipeline_processor_index)->second;
     } else {
         Logger::info << "Started response pipeline" << endl;
+        // TODO: Get proper next processor for return pipeline
         currentProcessor = nullptr;
         is_response = true;
     }
@@ -130,6 +128,10 @@ void ProcessingPipeline::startPipelineProcess(ProcessingPipelinePacket* data) {
         Logger::info << "Starting return to frontend server" << endl;
         frontend_server->processResponse(data->getClientSocket(), client_connection_module->handleWrite(data));
     }
+}
+
+void ProcessingPipeline::setInitializationData(string name, InitializationData* data) {
+    // TODO: move something here?
 }
 
 ProcessingPipelineData * ProcessingPipeline::getProcessingPipelineData() {

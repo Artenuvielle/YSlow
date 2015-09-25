@@ -1,52 +1,57 @@
 #include <stdlib.h>
 #include <signal.h>
-#include <lua.hpp>
+#include <sstream>
 
 #include "EPoll.h"
+#include "ConfigurationProcessor.h"
 #include "ProcessingPipeline.h"
 #include "Logger.h"
 
 using namespace std;
 
-char* get_config_opt(lua_State* L, string name) {
-    lua_getglobal(L, name.c_str());
-    if (!lua_isstring(L, -1)) {
-        Logger::error << name << " must be a string" << endl;
-        exit(1);
-    }
-    return const_cast<char*>(lua_tostring(L, -1));
-}
-
 int main(int argc, char *argv[]) {
-    if (argc != 2) {
-        Logger::error << "Usage: " << argv[0] << " <config_file>" << endl;
+    if (argc != 2 && argc != 3) {
+        Logger::error << "Usage: " << argv[0] << " <config_file> [<library_directory>]" << endl;
         exit(1);
     }
     cout << "---------------------------------------------" << endl;
     cout << "------------ YSlow Reverse Proxy ------------" << endl;
     cout << "---------------------------------------------" << endl << endl;
 
-    lua_State *L = lua_open();
+    string library_path;
 
-    if (luaL_dofile(L, argv[1]) != 0) {
-        Logger::error << "Error parsing config file: " << lua_tostring(L, -1) << endl;
-        exit(1);
+    if (argc == 2) {
+        string executable_path = (argv[0]);
+        stringstream path_stream;
+        path_stream << executable_path.substr(0, executable_path.rfind('/') + 1) << "ModuleLibraries/";
+        library_path = path_stream.str();
+    } else {
+        library_path = string(argv[2]);
     }
-    char* server_port_str = get_config_opt(L, "listenPort");
-    char* backend_address = get_config_opt(L, "backendAddress");
-    char* backend_port_str = get_config_opt(L, "backendPort");
+
+    EPollManager* epoll_manager = new EPollManager();
+
+    LuaConfigurationProcessor* configuration_processor = new LuaConfigurationProcessor(argv[1]);
+    configuration_processor->loadLibrariesFrom(library_path);
+    configuration_processor->initializeProcessorList(epoll_manager);
+    configuration_processor->initializePipelinePortList();
+    PipelineProcessor* pipeline_modules;
 
     signal(SIGPIPE, SIG_IGN);
 
-    ProcessingPipelineData* pipeline_data = new ProcessingPipelineData;
-    pipeline_data->epoll_manager = new EPollManager();
-    pipeline_data->frontend_server_port_string = server_port_str;
-    pipeline_data->backend_server_host_string = backend_address;
-    pipeline_data->backend_server_port_string = backend_port_str;
+    vector<string>* ports = configuration_processor->getAllPorts();
+    for (int i = 0; i < ports->size(); i++) {
+        ProcessingPipelineData* pipeline_data = new ProcessingPipelineData;
+        pipeline_data->epoll_manager = epoll_manager;
+        pipeline_data->frontend_server_port_string = ports->at(i);
+        pipeline_data->pipeline_processors = configuration_processor->getAllProcessors();
+        pipeline_data->first_pipeline_processor_index = configuration_processor->getFirstProcessorIDForPort(ports->at(i));
+        pipeline_data->connection_module = configuration_processor->getConnectionForPort(ports->at(i));
 
-    ProcessingPipeline* main_pipeline = new ProcessingPipeline(pipeline_data);
-    main_pipeline->setupPipeline();
-    delete main_pipeline;
+        ProcessingPipeline* main_pipeline = new ProcessingPipeline(pipeline_data);
+        main_pipeline->setupPipeline();
+        delete main_pipeline;
+    }
 
     return 0;
 }

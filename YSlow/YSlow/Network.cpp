@@ -53,12 +53,12 @@ class Socket {
 
 class ServerSocket : public Socket {
     public:
-        ServerSocket(char* server_port_str) {
+        ServerSocket(string server_port_str) {
             initServerSocket(server_port_str);
             makeSocketNonBlocking();
         }
     private:
-        void initServerSocket(char* server_port_str) {
+        void initServerSocket(string server_port_str) {
             addrinfo hints;
             memset(&hints, 0, sizeof(addrinfo));
             hints.ai_family = AF_UNSPEC;
@@ -67,7 +67,7 @@ class ServerSocket : public Socket {
 
             addrinfo* addrs;
             int getaddrinfo_error;
-            getaddrinfo_error = getaddrinfo(nullptr, server_port_str, &hints, &addrs);
+            getaddrinfo_error = getaddrinfo(nullptr, server_port_str.c_str(), &hints, &addrs);
             if (getaddrinfo_error != 0) {
                 Logger::info << "Couldn't find local host details: " << gai_strerror(getaddrinfo_error) << endl;
                 exit(1);
@@ -333,27 +333,10 @@ void FrontendServer::setClientConnectionHandler(ClientSocketReadHandler* connect
 void FrontendServer::handleNewConnection(int file_descriptor) {
     Logger::info << "Creating connection object for incoming connection..." << endl;
     ClientSocket* client_socket = new ClientSocket(file_descriptor, epoll_manager, response_handler, this);
-    ClientSocketList* new_client_socket_list_element = new ClientSocketList;
-    *new_client_socket_list_element = { client_socket, client_list };
-    client_list = new_client_socket_list_element;
 }
 
 void FrontendServer::handleClose(ClientSocket* socket) {
-    ClientSocketList* previous_client = nullptr;
-    ClientSocketList* this_client;
-    for (this_client = client_list; this_client->socket != socket; this_client = this_client->next_socket) {
-        if (this_client->next_socket == nullptr) {
-            Logger::warn << "Could not find client socket to close" << endl;
-            delete socket;
-            return;
-        }
-        previous_client = this_client;
-    }
-    if (previous_client != nullptr) {
-        previous_client->next_socket = this_client->next_socket;
-    }
     delete socket;
-    delete this_client;
     Logger::info << "Frontend connection closed" << endl;
 }
 
@@ -364,7 +347,7 @@ void FrontendServer::processResponse(ClientSocket* socket, string packet) {
 class BackendResponseHandler : public ClientSocketReadHandler, public ClientSocketCloseHandler {
     public:
         void handleRead(char* read_buffer, int bytes_read, ClientSocket* socket) override {
-            Logger::info << "Got chunk from backend (" << bytes_read << " byte)" << endl;
+            Logger::info << "Got chunk from backend (" << bytes_read << " byte):" << endl << string(read_buffer, bytes_read) << endl;
 
             ProcessingPipelinePacket* packet_data = static_cast<ProcessingPipelinePacket*>(socket->getEventData());
 
@@ -395,14 +378,15 @@ class BackendResponseHandler : public ClientSocketReadHandler, public ClientSock
         }
         void handleClose(ClientSocket* socket) override {
             Logger::info << "Backend connection closed" << endl;
-            static_cast<ClientSocket*>(socket->getEventData())->requestClose();
+            ProcessingPipelinePacket* packet_data = static_cast<ProcessingPipelinePacket*>(socket->getEventData());
+            packet_data->getClientSocket()->requestClose();
         }
 };
 
-BackendServer::BackendServer(ProcessingPipelineData* pipeline_data) {
-    epoll_manager = pipeline_data->epoll_manager;
-    backend_server_host_string = pipeline_data->backend_server_host_string;
-    backend_server_port_string = pipeline_data->backend_server_port_string;
+BackendServer::BackendServer(EPollManager* v_epoll_manager, const char* v_backend_server_host_string, const char* v_backend_server_port_string) {
+    epoll_manager = v_epoll_manager;
+    backend_server_host_string = string(v_backend_server_host_string);
+    backend_server_port_string = string(v_backend_server_port_string);
     response_handler = new BackendResponseHandler();
 }
 
@@ -420,11 +404,11 @@ PipelineProcessor* BackendServer::processRequest(ProcessingPipelinePacket* data)
     delete request_builder;
     socket->send(packet_string);
 
-    ClientSocketList* new_client_socket_list_element = new ClientSocketList;
-    *new_client_socket_list_element = { socket, client_list };
-    client_list = new_client_socket_list_element;
-
     return nullptr;
+}
+
+void BackendServer::setInitializationData(string name, InitializationData* data) {
+    // TODO: move data here
 }
 
 int BackendServer::initBackendConnection() {
@@ -435,7 +419,7 @@ int BackendServer::initBackendConnection() {
 
     int getaddrinfo_error;
     struct addrinfo* addrs;
-    getaddrinfo_error = getaddrinfo(backend_server_host_string, backend_server_port_string, &hints, &addrs);
+    getaddrinfo_error = getaddrinfo(backend_server_host_string.c_str(), backend_server_port_string.c_str(), &hints, &addrs);
     if (getaddrinfo_error != 0) {
         if (getaddrinfo_error == EAI_SYSTEM) {
             Logger::error << "Couldn't find backend " << backend_server_host_string << ":" << backend_server_port_string << endl;

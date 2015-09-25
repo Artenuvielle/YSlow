@@ -15,7 +15,7 @@ OBJCOPY := objcopy
 PREPROCESSOR_MACROS := DEBUG
 INCLUDE_DIRS := /usr/local/include/luajit-2.0/
 LIBRARY_DIRS := /usr/local/lib
-LIBRARY_NAMES := luajit-5.1
+LIBRARY_NAMES := luajit-5.1 dl
 ADDITIONAL_LINKER_INPUTS := 
 MACOS_FRAMEWORKS := 
 LINUX_PACKAGES := 
@@ -23,7 +23,7 @@ LINUX_PACKAGES :=
 CFLAGS := -std=c++11 -ggdb -ffunction-sections -O0
 CXXFLAGS := -std=c++11 -ggdb -ffunction-sections -O0
 ASFLAGS := 
-LDFLAGS := -Wl,-rpath,-gc-sections
+LDFLAGS := -Wl,-rpath,-gc-sections,-E
 COMMONFLAGS := 
 
 START_GROUP := -Wl,--start-group

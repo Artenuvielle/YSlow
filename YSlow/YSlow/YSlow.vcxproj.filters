@@ -31,10 +31,13 @@
     <ClCompile Include="EPoll.cpp">
       <Filter>Source files</Filter>
     </ClCompile>
-    <ClCompile Include="ConnectionHandler.cpp">
+    <ClCompile Include="Network.cpp">
       <Filter>Source files</Filter>
     </ClCompile>
-    <ClCompile Include="Network.cpp">
+    <ClCompile Include="ConfigurationProcessor.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="HTTPConnectionHandler.cpp">
       <Filter>Source files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -60,10 +63,13 @@
     <ClInclude Include="EPoll.h">
       <Filter>Header files</Filter>
     </ClInclude>
-    <ClInclude Include="ConnectionHandler.h">
+    <ClInclude Include="Network.h">
       <Filter>Header files</Filter>
     </ClInclude>
-    <ClInclude Include="Network.h">
+    <ClInclude Include="ConfigurationProcessor.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="HTTPConnectionHandler.h">
       <Filter>Header files</Filter>
     </ClInclude>
   </ItemGroup>

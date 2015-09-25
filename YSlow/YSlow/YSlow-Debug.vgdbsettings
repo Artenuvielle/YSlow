@@ -126,7 +126,7 @@
     <LaunchGDBSettings xsi:type="GDBLaunchParametersNewInstance">
       <DebuggedProgram>$(TargetPath)</DebuggedProgram>
       <GDBServerPort>2000</GDBServerPort>
-      <ProgramArguments>~/test.lua</ProgramArguments>
+      <ProgramArguments>~/workspace/YSlow-Config/src/main.lua</ProgramArguments>
     </LaunchGDBSettings>
     <GenerateCtrlBreakInsteadOfCtrlC>false</GenerateCtrlBreakInsteadOfCtrlC>
     <DeploymentTargetPath />
@@ -139,7 +139,22 @@
   </Debug>
   <CustomBuild>
     <PreBuildActions />
-    <PostBuildActions />
+    <PostBuildActions>
+      <CustomActionBase xsi:type="CommandLineAction">
+        <SkipWhenRunningCommandList>false</SkipWhenRunningCommandList>
+        <RemoteHost>
+          <HostName>192.168.143.128</HostName>
+          <Transport>SSH</Transport>
+          <UserName>rene</UserName>
+        </RemoteHost>
+        <Command>mkdir</Command>
+        <Arguments>-p ModuleLibraries &amp;&amp; cp -rf ModuleLibraries Debug/</Arguments>
+        <WorkingDirectory>$(BuildDir)</WorkingDirectory>
+        <Environment>
+          <Records />
+        </Environment>
+      </CustomActionBase>
+    </PostBuildActions>
     <PreCleanActions />
     <PostCleanActions />
   </CustomBuild>

@@ -17,7 +17,7 @@
       <UniqueIdentifier>{c6beac02-f4f9-4478-bc4d-4139cf5a2b3f}</UniqueIdentifier>
       <Extensions>*.mak</Extensions>
     </Filter>
-    <Filter Include="http_parser">
+    <Filter Include="Header files\http_parser">
       <UniqueIdentifier>{22b1e7fb-7448-4e00-8cae-df52e5ea3f8a}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
@@ -71,7 +71,7 @@
       <Filter>Header files</Filter>
     </ClInclude>
     <ClInclude Include="http_parser.h">
-      <Filter>http_parser</Filter>
+      <Filter>Header files\http_parser</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -109,7 +109,7 @@
       <Filter>Source files</Filter>
     </ClCompile>
     <ClCompile Include="http_parser.c">
-      <Filter>http_parser</Filter>
+      <Filter>Header files\http_parser</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

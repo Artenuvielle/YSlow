@@ -63,7 +63,8 @@
   <ItemDefinitionGroup>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="ConnectionHandler.cpp" />
+    <ClCompile Include="ConfigurationProcessor.cpp" />
+    <ClCompile Include="HTTPConnectionHandler.cpp" />
     <ClCompile Include="EPoll.cpp" />
     <ClCompile Include="Network.cpp" />
     <ClCompile Include="Logger.cpp" />
@@ -76,7 +77,8 @@
     <None Include="release.mak" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="ConnectionHandler.h" />
+    <ClInclude Include="ConfigurationProcessor.h" />
+    <ClInclude Include="HTTPConnectionHandler.h" />
     <ClInclude Include="EPoll.h" />
     <ClInclude Include="Network.h" />
     <ClInclude Include="Logger.h" />

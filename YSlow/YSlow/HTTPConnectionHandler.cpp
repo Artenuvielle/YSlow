@@ -1,32 +1,30 @@
 #include "Logger.h"
 #include "ProcessingPipeline.h"
-#include "ConnectionHandler.h"
-#include "../httpxx/Response.hpp"
+#include "HTTPConnectionHandler.h"
 #include "../httpxx/ResponseBuilder.hpp"
 
 using namespace std;
 
-ClientConnectionModule::ClientConnectionModule(ProcessingPipelineData* v_pipeline_data) : pipeline_data(v_pipeline_data) {
-}
-
-ProcessingPipelineData * ClientConnectionModule::getPipelineData() {
-    return pipeline_data;
-}
-
-HTTPClientConnectionModule::HTTPClientConnectionModule(ProcessingPipelineData* pipeline_data) : ClientConnectionModule(pipeline_data) {
+HTTPClientConnectionModule::HTTPClientConnectionModule() {
 }
 
 HTTPClientConnectionModule::~HTTPClientConnectionModule() {
 }
 
 bool HTTPClientConnectionModule::handleRead(ProcessingPipelinePacket* packet, char* read_buffer, int bytes_read) {
-    Logger::info << "Got: " << bytes_read << " bytes" << endl;
+    Logger::info << "Got: " << bytes_read << " bytes:" << endl << string(read_buffer, bytes_read) << endl;
     http::BufferedRequest* current_request = packet->getPacketRequestData();
     if (current_request == nullptr) {
         current_request = new http::BufferedRequest();
         packet->setPacketRequestData(current_request);
     }
-    current_request->feed(read_buffer, bytes_read);
+
+    int parsed_bytes = 0;
+    while (parsed_bytes < bytes_read) {
+        int parsed_bytes_in_cycle = current_request->feed(read_buffer + parsed_bytes, bytes_read - parsed_bytes);
+        parsed_bytes += parsed_bytes_in_cycle;
+    }
+
     return current_request->complete();
 }
 
