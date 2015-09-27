@@ -2,35 +2,35 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <Filter Include="Source files">
-      <UniqueIdentifier>{9395c3aa-f861-42ba-8291-df49b7c62f81}</UniqueIdentifier>
+      <UniqueIdentifier>{224901e2-6539-4734-96a9-694dcb7de8b5}</UniqueIdentifier>
       <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
     </Filter>
     <Filter Include="Header files">
-      <UniqueIdentifier>{b218206e-1226-4b9d-8d3a-9e817139e168}</UniqueIdentifier>
+      <UniqueIdentifier>{015739b4-076c-4a81-8fdd-f05f858f87d3}</UniqueIdentifier>
       <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
     </Filter>
     <Filter Include="Resource files">
-      <UniqueIdentifier>{d734326f-7722-4b60-8ee0-1eeba1b89c59}</UniqueIdentifier>
+      <UniqueIdentifier>{297c4225-54bf-4464-9967-da0b52869e02}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav</Extensions>
     </Filter>
     <Filter Include="Make files">
-      <UniqueIdentifier>{8551605e-5c7f-40c4-8130-970e41c58bc6}</UniqueIdentifier>
+      <UniqueIdentifier>{1bb17c71-72ac-4b08-9ae9-0c987190a25e}</UniqueIdentifier>
       <Extensions>*.mak</Extensions>
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="libyslow.cpp">
+    <ClCompile Include="WebSocketConnectionModule.cpp">
       <Filter>Source files</Filter>
     </ClCompile>
-    <ClCompile Include="Logger.cpp">
+    <ClCompile Include="sha1.cpp">
       <Filter>Source files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="libyslow.h">
+    <ClInclude Include="WebSocketConnectionModule.h">
       <Filter>Header files</Filter>
     </ClInclude>
-    <ClInclude Include="Logger.h">
+    <ClInclude Include="sha1.h">
       <Filter>Header files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -23,7 +23,7 @@ error:
 	$(error Invalid configuration, please check your inputs)
 endif
 
-SOURCEFILES := libyslow.cpp
+SOURCEFILES := libyslow.cpp Logger.cpp
 EXTERNAL_LIBS := ../httpxx/$(BINARYDIR)/httpxx.a
 EXTERNAL_LIBS_COPIED := $(foreach lib, $(EXTERNAL_LIBS),$(BINARYDIR)/$(notdir $(lib)))
 

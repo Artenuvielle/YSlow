@@ -2,10 +2,9 @@
 #include <sstream>
 #include <dlfcn.h>
 #include "../LuaBridge/LuaBridge.h"
-#include "../libyslow/libyslow.h"
+#include "../libyslow/Logger.h"
 #include "lua.h"
 
-#include "Logger.h"
 #include "Network.h"
 #include "ConfigurationProcessor.h"
 
@@ -38,6 +37,12 @@ class LuaIterator {
     private:
         lua_State* L;
         bool is_first;
+};
+
+struct PipelinePortData {
+    int first_request_module;
+    int first_response_module;
+    ClientConnectionModule* connection_module;
 };
 
 map<string, LuaRef>* getLuaTable(LuaRef lua_refferer, lua_State* L) {
@@ -97,7 +102,7 @@ void LuaConfigurationProcessor::initializePipelinePortList() {
     if (port_to_processor_mapping != nullptr) {
         delete port_to_processor_mapping;
     }
-    port_to_processor_mapping = new std::map<string, pair<int, ClientConnectionModule*>>();
+    port_to_processor_mapping = new std::map<string, PipelinePortData>();
 
     LuaRef pipeline_ports = getGlobal(L, "PipelinePorts");
     map<string, LuaRef>* pipeline_ports_map = getLuaTable(pipeline_ports, L);
@@ -110,7 +115,9 @@ void LuaConfigurationProcessor::initializePipelinePortList() {
         ClientConnectionModule* connection_module = connection_library[requested_connection_handler_name]();
         string port = it->second["port"].cast<string>();
         ports->push_back(port);
-        port_to_processor_mapping->insert(pair<string, pair<int, ClientConnectionModule*>>(port, pair<int, ClientConnectionModule*>(it->second["module"].cast<int>(), connection_module)));
+        int request_proc = it->second["request_module"].cast<int>();
+        int response_proc = it->second["response_module"].isNil() ? -1 : it->second["response_module"].cast<int>();
+        port_to_processor_mapping->insert(pair<string, PipelinePortData>(port, PipelinePortData{ request_proc, response_proc, connection_module }));
     }
 }
 
@@ -122,12 +129,16 @@ vector<string>* LuaConfigurationProcessor::getAllPorts() {
     return ports;
 }
 
-int LuaConfigurationProcessor::getFirstProcessorIDForPort(string port) {
-    return port_to_processor_mapping->at(port).first;
+int LuaConfigurationProcessor::getFirstRequestProcessorIDForPort(string port) {
+    return port_to_processor_mapping->at(port).first_request_module;
+}
+
+int LuaConfigurationProcessor::getFirstResponseProcessorIDForPort(string port) {
+    return port_to_processor_mapping->at(port).first_response_module;
 }
 
 ClientConnectionModule* LuaConfigurationProcessor::getConnectionForPort(string port) {
-    return port_to_processor_mapping->at(port).second;
+    return port_to_processor_mapping->at(port).connection_module;
 }
 
 LuaConfigurationProcessor::~LuaConfigurationProcessor() {

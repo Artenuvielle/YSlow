@@ -10,6 +10,7 @@ class InitializationData;
 struct lua_State;
 struct ProcessingPipelineData;
 class ClientConnectionModule;
+struct PipelinePortData;
 
 using namespace std;
 
@@ -21,7 +22,8 @@ class LuaConfigurationProcessor {
         void initializePipelinePortList();
         map<int, PipelineProcessor*>* getAllProcessors();
         vector<string>* getAllPorts();
-        int getFirstProcessorIDForPort(string port);
+        int getFirstRequestProcessorIDForPort(string port);
+        int getFirstResponseProcessorIDForPort(string port);
         ClientConnectionModule* getConnectionForPort(string port);
         ~LuaConfigurationProcessor();
     private:
@@ -31,5 +33,5 @@ class LuaConfigurationProcessor {
         lua_State* L;
         map<int, PipelineProcessor*>* pipeline_processors = nullptr;
         vector<string>* ports;
-        map<string, pair<int, ClientConnectionModule*>>* port_to_processor_mapping = nullptr;
+        map<string, PipelinePortData>* port_to_processor_mapping = nullptr;
 };

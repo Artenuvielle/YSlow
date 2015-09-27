@@ -81,7 +81,6 @@
     <ClInclude Include="HTTPConnectionHandler.h" />
     <ClInclude Include="EPoll.h" />
     <ClInclude Include="Network.h" />
-    <ClInclude Include="Logger.h" />
     <ClInclude Include="ProcessingPipeline.h" />
     <ClInclude Include="resource.h" />
   </ItemGroup>

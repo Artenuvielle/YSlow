@@ -13,7 +13,8 @@ using namespace std;
 struct ProcessingPipelineData {
     EPollManager* epoll_manager;
     string frontend_server_port_string;
-    int first_pipeline_processor_index;
+    int first_request_pipeline_processor_index;
+    int first_response_pipeline_processor_index;
     map<int, PipelineProcessor*>* pipeline_processors;
     ClientConnectionModule* connection_module;
 };
@@ -73,6 +74,14 @@ class ResponsePipelineProcessor : public PipelineProcessor {
 
 class FirstPipelineProcessor;
 
+class ConnectionModuleDataCarrier {
+    public:
+        void setConnectionModuleData(void* v_data);
+        void* getConnectionModuleData();
+    private:
+        void* connection_module_data = nullptr;
+};
+
 class ProcessingPipelinePacket {
     public:
         ProcessingPipelinePacket(ProcessingPipelinePacketType v_type);
@@ -101,8 +110,9 @@ class ClientConnectionModule {
     public:
         ClientConnectionModule();
         void setPipelineData(ProcessingPipelineData* v_pipeline_data);
-        virtual bool handleRead(ProcessingPipelinePacket* packet, char* read_buffer, int bytes_read) = 0;
-        virtual string handleWrite(ProcessingPipelinePacket* packet) = 0;
+        virtual void handleRead(ConnectionModuleDataCarrier* socket, char* read_buffer, int bytes_read) = 0;
+        virtual ProcessingPipelinePacket* getCompletePacket(ConnectionModuleDataCarrier* socket) = 0;
+        virtual string handleWrite(ConnectionModuleDataCarrier* socket, ProcessingPipelinePacket* packet) = 0;
     protected:
         ProcessingPipelineData* getPipelineData();
     private:

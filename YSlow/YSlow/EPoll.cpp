@@ -5,7 +5,7 @@
 #include <sys/epoll.h>
 
 #include "EPoll.h"
-#include "Logger.h"
+#include "../libyslow/Logger.h"
 
 using namespace std;
 

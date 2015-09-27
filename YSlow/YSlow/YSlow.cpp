@@ -2,10 +2,10 @@
 #include <signal.h>
 #include <sstream>
 
+#include "../libyslow/Logger.h"
 #include "EPoll.h"
 #include "ConfigurationProcessor.h"
 #include "ProcessingPipeline.h"
-#include "Logger.h"
 
 using namespace std;
 
@@ -45,7 +45,8 @@ int main(int argc, char *argv[]) {
         pipeline_data->epoll_manager = epoll_manager;
         pipeline_data->frontend_server_port_string = ports->at(i);
         pipeline_data->pipeline_processors = configuration_processor->getAllProcessors();
-        pipeline_data->first_pipeline_processor_index = configuration_processor->getFirstProcessorIDForPort(ports->at(i));
+        pipeline_data->first_request_pipeline_processor_index = configuration_processor->getFirstRequestProcessorIDForPort(ports->at(i));
+        pipeline_data->first_response_pipeline_processor_index = configuration_processor->getFirstResponseProcessorIDForPort(ports->at(i));
         pipeline_data->connection_module = configuration_processor->getConnectionForPort(ports->at(i));
 
         ProcessingPipeline* main_pipeline = new ProcessingPipeline(pipeline_data);

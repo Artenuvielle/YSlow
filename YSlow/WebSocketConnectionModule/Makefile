@@ -5,7 +5,7 @@
 
 #VisualGDB: AutoSourceFiles		#<--- remove this line to disable auto-updating of SOURCEFILES and EXTERNAL_LIBS
 
-TARGETNAME := libyslow.so
+TARGETNAME := WebSocketConnectionModule.so
 #TARGETTYPE can be APP, STATIC or SHARED
 TARGETTYPE := SHARED
 
@@ -23,8 +23,8 @@ error:
 	$(error Invalid configuration, please check your inputs)
 endif
 
-SOURCEFILES := libyslow.cpp
-EXTERNAL_LIBS := ../httpxx/$(BINARYDIR)/httpxx.a
+SOURCEFILES := sha1.cpp WebSocketConnectionModule.cpp
+EXTERNAL_LIBS := ../httpxx/$(BINARYDIR)/httpxx.a ../wsxx/$(BINARYDIR)/wsxx.a ../libyslow/$(BINARYDIR)/libyslow.so
 EXTERNAL_LIBS_COPIED := $(foreach lib, $(EXTERNAL_LIBS),$(BINARYDIR)/$(notdir $(lib)))
 
 CFLAGS += $(COMMONFLAGS)
@@ -165,4 +165,10 @@ $(BINARYDIR)/%.o : %.cxx $(all_make_files) |$(BINARYDIR)
 #VisualGDB: GeneratedRules				#<--- All lines below are auto-generated
 $(BINARYDIR)/httpxx.a : ../httpxx/$(BINARYDIR)/httpxx.a
 	$(CP) ../httpxx/$(BINARYDIR)/httpxx.a $(BINARYDIR)/httpxx.a
+
+$(BINARYDIR)/wsxx.a : ../wsxx/$(BINARYDIR)/wsxx.a
+	$(CP) ../wsxx/$(BINARYDIR)/wsxx.a $(BINARYDIR)/wsxx.a
+
+$(BINARYDIR)/libyslow.so : ../libyslow/$(BINARYDIR)/libyslow.so
+	$(CP) ../libyslow/$(BINARYDIR)/libyslow.so $(BINARYDIR)/libyslow.so
 

@@ -7,7 +7,7 @@
 #include <fcntl.h>
 
 #include "EPoll.h"
-#include "Logger.h"
+#include "../libyslow/Logger.h"
 #include "ProcessingPipeline.h"
 #include "Network.h"
 
@@ -111,7 +111,7 @@ struct DataBufferEntry {
     DataBufferEntry* next;
 };
 
-class ClientSocket : public Socket, EPollEventHandler {
+class ClientSocket : public Socket, EPollEventHandler, public ConnectionModuleDataCarrier {
     public:
         ClientSocket(int file_descriptor, EPollManager* v_epoll_manager, ClientSocketReadHandler* v_read_handler = nullptr, ClientSocketCloseHandler* v_close_handler = nullptr) : EPollEventHandler(file_descriptor) {
             setSocketFileDescriptor(file_descriptor);
@@ -122,6 +122,7 @@ class ClientSocket : public Socket, EPollEventHandler {
             epoll_manager->addEventHandler(this, EPOLLIN | EPOLLRDHUP | EPOLLET | EPOLLOUT);
         }
         ~ClientSocket() {
+            epoll_manager->removeEventHandler(this);
             DataBufferEntry* next;
             while (write_buffer != nullptr) {
                 next = write_buffer->next;
@@ -131,7 +132,6 @@ class ClientSocket : public Socket, EPollEventHandler {
                 delete write_buffer;
                 write_buffer = next;
             }
-            epoll_manager->removeEventHandler(this);
         }
         void handleEPollEvent(uint32_t events) override {
             if (events & EPOLLOUT) {
@@ -278,12 +278,16 @@ class ClientSocket : public Socket, EPollEventHandler {
         }
 };
 
-void ClientSocketEventDataCommunicator::setEventData(ClientSocket* socket, void* data) {
+void ClientSocketCommunicator::setEventData(ClientSocket* socket, void* data) {
     socket->setEventData(data);
 }
 
-void* ClientSocketEventDataCommunicator::getEventData(ClientSocket* socket) {
+void* ClientSocketCommunicator::getEventData(ClientSocket* socket) {
     return socket->getEventData();
+}
+
+ConnectionModuleDataCarrier* ClientSocketCommunicator::getConnectionModuleDataCarrier(ClientSocket* socket) {
+    return static_cast<ConnectionModuleDataCarrier*>(socket);
 }
 
 class FrontendEPollHandler : public EPollEventHandler {
@@ -347,7 +351,8 @@ void FrontendServer::processResponse(ClientSocket* socket, string packet) {
 class BackendResponseHandler : public ClientSocketReadHandler, public ClientSocketCloseHandler {
     public:
         void handleRead(char* read_buffer, int bytes_read, ClientSocket* socket) override {
-            Logger::info << "Got chunk from backend (" << bytes_read << " byte):" << endl << string(read_buffer, bytes_read) << endl;
+            //Logger::info << "Got chunk from backend (" << bytes_read << " byte):" << endl << string(read_buffer, bytes_read) << endl;
+            Logger::debug << "Got chunk from backend (" << bytes_read << " byte)" << endl;
 
             ProcessingPipelinePacket* packet_data = static_cast<ProcessingPipelinePacket*>(socket->getEventData());
 

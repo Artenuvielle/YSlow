@@ -22,7 +22,7 @@
     <ClCompile Include="WebsocketParser.cpp">
       <Filter>Source files</Filter>
     </ClCompile>
-    <ClCompile Include="Frame.cpp">
+    <ClCompile Include="base64.cpp">
       <Filter>Source files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -30,7 +30,7 @@
     <ClInclude Include="WebsocketParser.h">
       <Filter>Header files</Filter>
     </ClInclude>
-    <ClInclude Include="Frame.h">
+    <ClInclude Include="base64.h">
       <Filter>Header files</Filter>
     </ClInclude>
   </ItemGroup>

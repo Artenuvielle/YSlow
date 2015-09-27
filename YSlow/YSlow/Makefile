@@ -24,7 +24,7 @@ error:
 endif
 
 SOURCEFILES := ConfigurationProcessor.cpp HTTPConnectionHandler.cpp EPoll.cpp Network.cpp Logger.cpp ProcessingPipeline.cpp YSlow.cpp
-EXTERNAL_LIBS := ../httpxx/$(BINARYDIR)/httpxx.a ../LuaBridge/$(BINARYDIR)/LuaBridge.a ../ConditionModule/$(BINARYDIR)/ConditionModule.so ../libyslow/$(BINARYDIR)/libyslow.so
+EXTERNAL_LIBS := ../httpxx/$(BINARYDIR)/httpxx.a ../LuaBridge/$(BINARYDIR)/LuaBridge.a ../libyslow/$(BINARYDIR)/libyslow.so
 EXTERNAL_LIBS_COPIED := $(foreach lib, $(EXTERNAL_LIBS),$(BINARYDIR)/$(notdir $(lib)))
 
 CFLAGS += $(COMMONFLAGS)
@@ -168,9 +168,6 @@ $(BINARYDIR)/httpxx.a : ../httpxx/$(BINARYDIR)/httpxx.a
 
 $(BINARYDIR)/LuaBridge.a : ../LuaBridge/$(BINARYDIR)/LuaBridge.a
 	$(CP) ../LuaBridge/$(BINARYDIR)/LuaBridge.a $(BINARYDIR)/LuaBridge.a
-
-$(BINARYDIR)/ConditionModule.so : ../ConditionModule/$(BINARYDIR)/ConditionModule.so
-	$(CP) ../ConditionModule/$(BINARYDIR)/ConditionModule.so $(BINARYDIR)/ConditionModule.so
 
 $(BINARYDIR)/libyslow.so : ../libyslow/$(BINARYDIR)/libyslow.so
 	$(CP) ../libyslow/$(BINARYDIR)/libyslow.so $(BINARYDIR)/libyslow.so

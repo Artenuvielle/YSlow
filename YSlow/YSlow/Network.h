@@ -8,12 +8,13 @@ class EPollManager;
 class BackendResponseHandler;
 class ClientSocket;
 
-class ClientSocketEventDataCommunicator {
+class ClientSocketCommunicator {
     public:
         static void setEventData(ClientSocket* socket, void* data);
         static void* getEventData(ClientSocket* socket);
+        static ConnectionModuleDataCarrier* getConnectionModuleDataCarrier(ClientSocket* socket);
     private:
-        ClientSocketEventDataCommunicator() {}
+        ClientSocketCommunicator() {}
 };
 
 class ClientSocketReadHandler {

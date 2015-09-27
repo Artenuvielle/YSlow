@@ -1,15 +1,70 @@
 //#include <stdlib.h>
 #include <limits.h>
 #include <time.h>
-#include "Frame.h"
 
 #include "WebsocketParser.h"
 
 namespace wsxx {
-    WebsocketParser::WebsocketParser() {
+    char* WebSocketFrame::getData() {
+        return data;
     }
 
-    void WebsocketParser::feed(const char* data, size_t length) {
+    void WebSocketFrame::setData(char* v_data) {
+        data = v_data;
+    }
+
+    long WebSocketFrame::getDataLength() {
+        return data_length;
+    }
+
+    void WebSocketFrame::setDataLength(int v_data_length) {
+        data_length = v_data_length;
+    }
+
+    bool WebSocketFrame::isFin() {
+        return fin;
+    }
+
+    void WebSocketFrame::setFin(bool v_fin) {
+        fin = v_fin;
+    }
+
+    bool WebSocketFrame::isRSV1() {
+        return rsv_1;
+    }
+
+    void WebSocketFrame::setRSV1(bool v_rsv_1) {
+        rsv_1 = v_rsv_1;
+    }
+
+    bool WebSocketFrame::isRSV2() {
+        return rsv_2;
+    }
+
+    void WebSocketFrame::setRSV2(bool v_rsv_2) {
+        rsv_2 = v_rsv_2;
+    }
+
+    bool WebSocketFrame::isRSV3() {
+        return rsv_3;
+    }
+
+    void WebSocketFrame::setRSV3(bool v_rsv_3) {
+        rsv_3 = v_rsv_3;
+    }
+
+    int WebSocketFrame::getOpcode() {
+        return opcode;
+    }
+
+    void WebSocketFrame::setOpcode(int v_opcode) {
+        opcode = v_opcode;
+    }
+
+    WebSocketParser::WebSocketParser() {
+    }
+
+    void WebSocketParser::feed(const char* data, size_t length) {
         for (int i = 0; i < length; i++) {
             char cur = data[i];
             for (int a = 0; a < CHAR_BIT; a++) {
@@ -19,17 +74,18 @@ namespace wsxx {
         }
     }
 
-    WebSocketFrame* WebsocketParser::complete() {
-        if (completed_list == nullptr) {
-            return nullptr;
-        } else {
+    WebSocketFrame* WebSocketParser::getComplete() {
+        if (completed_list != nullptr) {
             WebSocketFrame* ret = completed_list->frame;
             WebsocketFrameListElement* el = completed_list;
             completed_list = completed_list->next;
             delete el;
+            return ret;
         }
+        return nullptr;
     }
-    void WebsocketParser::interpretBit(bool bit) {
+
+    void WebSocketParser::interpretBit(bool bit) {
         if (state == FIN) {
             if (current == nullptr) {
                 current = new WebSocketFrame();
@@ -46,6 +102,7 @@ namespace wsxx {
             state = RSV3;
         } else if (state == RSV3) {
             current->setRSV3(bit);
+            opcode = 0;
             state = OPCODE;
         } else if (state == OPCODE) {
             opcode = (opcode << 1) | bit;
@@ -58,6 +115,7 @@ namespace wsxx {
             }
         } else if (state == MASK) {
             is_masked = bit;
+            length = 0;
             state = LEN;
         } else if (state == LEN) {
             length = (length << 1) | bit;
@@ -81,7 +139,7 @@ namespace wsxx {
         } else if (state == LEN_EXT) {
             length = (length << 1) | bit;
             bit_read++;
-            if (bit_read >= 32) {
+            if (bit_read >= 16) {
                 current->setDataLength(length);
                 if (is_masked) {
                     state = MASK_KEY;
@@ -100,10 +158,9 @@ namespace wsxx {
                 state = DATA;
             }
         } else if (state == MASK_KEY) {
-            length = (length << 1) | bit;
+            masking_key[bit_read] = bit;
             bit_read++;
             if (bit_read >= 32) {
-                masking_key = std::bitset<32>(length);
                 bit_read = 0;
                 length = 0;
                 state = DATA;
@@ -129,11 +186,15 @@ namespace wsxx {
                     mask_offset = 0;
                     data_offset = 0;
                     data = nullptr;
-                    WebsocketFrameListElement* last = completed_list;
-                    while (last->next != nullptr) {
-                        last = last->next;
+                    if (completed_list == nullptr) {
+                        completed_list = new WebsocketFrameListElement{ current, nullptr };
+                    } else {
+                        WebsocketFrameListElement* last = completed_list;
+                        while (last->next != nullptr) {
+                            last = last->next;
+                        }
+                        last->next = new WebsocketFrameListElement{ current, nullptr };
                     }
-                    last->next = new WebsocketFrameListElement{ current, nullptr };
                     current = nullptr;
                     state = FIN;
                 }
@@ -145,7 +206,7 @@ namespace wsxx {
     std::string WebSocketFrameBuilder::toString(bool useMask) {
         int header_size = 2;
         if (frame->getDataLength() >= 126) {
-            header_size += 4;
+            header_size += 2;
         }
         if (useMask) {
             header_size += 4;
@@ -165,10 +226,6 @@ namespace wsxx {
         } else {
             // lengths over 2^32 Bit unsupported
             frame_sequence[frame_offset] = (frame_sequence[frame_offset] << 7) | 0x7E;
-            frame_offset++;
-            frame_sequence[frame_offset] = (frame->getDataLength() >> 24);
-            frame_offset++;
-            frame_sequence[frame_offset] = (frame->getDataLength() >> 16);
             frame_offset++;
             frame_sequence[frame_offset] = (frame->getDataLength() >> 8);
             frame_offset++;
@@ -200,6 +257,6 @@ namespace wsxx {
                 frame_offset++;
             }
         }
-        return std::string(frame_sequence);
+        return std::string(frame_sequence, frame_offset);
     }
 }

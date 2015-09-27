@@ -7,8 +7,9 @@ class HTTPClientConnectionModule : public ClientConnectionModule {
     public:
         HTTPClientConnectionModule();
         ~HTTPClientConnectionModule();
-        bool handleRead(ProcessingPipelinePacket* packet, char* read_buffer, int bytes_read) override;
-        string handleWrite(ProcessingPipelinePacket* packet) override;
+        void handleRead(ConnectionModuleDataCarrier* socket, char* read_buffer, int bytes_read) override;
+        ProcessingPipelinePacket* getCompletePacket(ConnectionModuleDataCarrier* socket) override;
+        string handleWrite(ConnectionModuleDataCarrier* socket, ProcessingPipelinePacket* packet) override;
 };
 
 extern "C" {
