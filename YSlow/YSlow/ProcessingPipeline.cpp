@@ -23,7 +23,7 @@ class InitialClientReadHandler : public ClientSocketReadHandler {
 
             ProcessingPipelinePacket* packet = connection_module->getCompletePacket(connection_data_carrier);
             while (packet != nullptr) {
-                packet->setClientSocket(socket);
+                packet->setClientSocketPointer(ClientSocketCommunicator::getSharedPointer(socket));
                 first_processor->startPipelineProcess(packet);
                 packet = connection_module->getCompletePacket(connection_data_carrier);
             }
@@ -76,7 +76,9 @@ void ProcessingPipeline::startPipelineProcess(ProcessingPipelinePacket* data) {
 
     if (is_response) {
         Logger::info << "Starting return to frontend server" << endl;
-        frontend_server->processResponse(data->getClientSocket(), client_connection_module->handleWrite(ClientSocketCommunicator::getConnectionModuleDataCarrier(data->getClientSocket()), data));
+        if (shared_ptr<ClientSocket> temp_lock = data->getClientSocket().lock()) {
+            frontend_server->processResponse(temp_lock.get(), client_connection_module->handleWrite(ClientSocketCommunicator::getConnectionModuleDataCarrier(temp_lock.get()), data));
+        }
     }
 }
 

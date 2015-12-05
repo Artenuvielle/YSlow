@@ -1,3 +1,9 @@
+#ifdef _MSC_VER
+#undef __cplusplus
+#define __cplusplus 201103L
+#endif
+
+#include <memory>
 #include <unistd.h>
 #include <stdlib.h>
 #include <string.h>
@@ -119,6 +125,7 @@ class ClientSocket : public Socket, EPollEventHandler, public ConnectionModuleDa
             read_handler = v_read_handler;
             close_handler = v_close_handler;
             makeSocketNonBlocking();
+            write_buffer = nullptr;
             epoll_manager->addEventHandler(this, EPOLLIN | EPOLLRDHUP | EPOLLET | EPOLLOUT);
         }
         ~ClientSocket() {
@@ -189,8 +196,13 @@ class ClientSocket : public Socket, EPollEventHandler, public ConnectionModuleDa
         void* getEventData() {
             return event_data;
         }
+        shared_ptr<ClientSocket> getSharedPointer() {
+            //return this_shared_pointer;
+            return shared_ptr<ClientSocket>(this);
+        }
     private:
         void* event_data = nullptr;
+        shared_ptr<ClientSocket> this_shared_pointer;
         EPollManager* epoll_manager;
         ClientSocketReadHandler* read_handler = nullptr;
         ClientSocketCloseHandler* close_handler = nullptr;
@@ -286,6 +298,10 @@ void* ClientSocketCommunicator::getEventData(ClientSocket* socket) {
     return socket->getEventData();
 }
 
+shared_ptr<ClientSocket> ClientSocketCommunicator::getSharedPointer(ClientSocket* socket) {
+    return socket->getSharedPointer();
+}
+
 ConnectionModuleDataCarrier* ClientSocketCommunicator::getConnectionModuleDataCarrier(ClientSocket* socket) {
     return static_cast<ConnectionModuleDataCarrier*>(socket);
 }
@@ -336,7 +352,9 @@ void FrontendServer::setClientConnectionHandler(ClientSocketReadHandler* connect
 
 void FrontendServer::handleNewConnection(int file_descriptor) {
     Logger::info << "Creating connection object for incoming connection..." << endl;
+    // TODO: Move shared pointer to client socket? give out weak pointers...
     ClientSocket* client_socket = new ClientSocket(file_descriptor, epoll_manager, response_handler, this);
+    //std::shared_ptr<ClientSocket> client_socket = make_shared<ClientSocket>(file_descriptor, epoll_manager, response_handler, this);
 }
 
 void FrontendServer::handleClose(ClientSocket* socket) {
@@ -384,7 +402,11 @@ class BackendResponseHandler : public ClientSocketReadHandler, public ClientSock
         void handleClose(ClientSocket* socket) override {
             Logger::info << "Backend connection closed" << endl;
             ProcessingPipelinePacket* packet_data = static_cast<ProcessingPipelinePacket*>(socket->getEventData());
-            packet_data->getClientSocket()->requestClose();
+            if (packet_data != nullptr && !packet_data->getIsSocketClosed()) {
+                if (shared_ptr<ClientSocket> temp_lock = packet_data->getClientSocket().lock()) {
+                    temp_lock.get()->requestClose();
+                }
+            }
         }
 };
 
@@ -410,6 +432,12 @@ PipelineProcessor* BackendServer::processRequest(ProcessingPipelinePacket* data)
     socket->send(packet_string);
 
     return nullptr;
+}
+
+void BackendServer::request(string test) {
+    int backend_socket_file_descriptor = initBackendConnection();
+    ClientSocket* socket = new ClientSocket(backend_socket_file_descriptor, epoll_manager, response_handler, response_handler);
+    socket->send(test);
 }
 
 void BackendServer::setInitializationData(string name, InitializationData* data) {

@@ -94,8 +94,12 @@ void ProcessingPipelinePacket::setPacketResponseData(http::BufferedResponse* v_d
     response_data = v_data;
 }
 
-void ProcessingPipelinePacket::setClientSocket(ClientSocket* socket) {
-    client_socket = socket;
+void ProcessingPipelinePacket::setClientSocketPointer(shared_ptr<ClientSocket> socket) {
+    client_socket = weak_ptr<ClientSocket>(socket);
+}
+
+void ProcessingPipelinePacket::setIsSocketClosed(bool v_isClosed) {
+    isSocketClosed = v_isClosed;
 }
 
 void ProcessingPipelinePacket::setFirstPipelineProcessor(FirstPipelineProcessor* v_processor) {
@@ -118,8 +122,14 @@ ProcessingPipelinePacketType ProcessingPipelinePacket::getPacketType() {
     return type;
 }
 
-ClientSocket* ProcessingPipelinePacket::getClientSocket() {
-    return client_socket;
+weak_ptr<ClientSocket> ProcessingPipelinePacket::getClientSocket() {
+    if (shared_ptr<ClientSocket> temp_lock = client_socket.lock()) {
+        return weak_ptr<ClientSocket>(temp_lock);
+    }
+}
+
+bool ProcessingPipelinePacket::getIsSocketClosed() {
+    return isSocketClosed;
 }
 
 FirstPipelineProcessor* ProcessingPipelinePacket::getFirstPipelineProcessor() {

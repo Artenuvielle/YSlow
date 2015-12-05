@@ -1,5 +1,12 @@
 #pragma once
+
+#ifdef _MSC_VER
+#undef __cplusplus
+#define __cplusplus 201103L
+#endif
+
 #include <map>
+#include <memory>
 #include "../httpxx/BufferedMessage.hpp"
 
 class EPollManager;
@@ -88,18 +95,21 @@ class ProcessingPipelinePacket {
         void setPacketType(ProcessingPipelinePacketType v_type);
         void setPacketRequestData(http::BufferedRequest* v_data);
         void setPacketResponseData(http::BufferedResponse* v_data);
-        void setClientSocket(ClientSocket* socket);
+        void setClientSocketPointer(shared_ptr<ClientSocket> socket);
+        void setIsSocketClosed(bool v_isClosed);
         void setFirstPipelineProcessor(FirstPipelineProcessor* v_processor);
         void setFirstResponsePipelineProcessor(ResponsePipelineProcessor* v_processor);
         http::BufferedRequest* getPacketRequestData();
         http::BufferedResponse* getPacketResponseData();
         ProcessingPipelinePacketType getPacketType();
-        ClientSocket* getClientSocket();
+        weak_ptr<ClientSocket> getClientSocket();
+        bool getIsSocketClosed();
         FirstPipelineProcessor* getFirstPipelineProcessor();
         PipelineProcessor* getFirstResponsePipelineProcessor();
     private:
         ProcessingPipelinePacketType type;
-        ClientSocket* client_socket = nullptr;
+        weak_ptr<ClientSocket> client_socket;
+        bool isSocketClosed = false;
         FirstPipelineProcessor* first_processor = nullptr;
         ResponsePipelineProcessor* first_response_processor = nullptr;
         http::BufferedRequest* request_data = nullptr;

@@ -12,6 +12,7 @@ class ClientSocketCommunicator {
     public:
         static void setEventData(ClientSocket* socket, void* data);
         static void* getEventData(ClientSocket* socket);
+        static shared_ptr<ClientSocket> getSharedPointer(ClientSocket* socket);
         static ConnectionModuleDataCarrier* getConnectionModuleDataCarrier(ClientSocket* socket);
     private:
         ClientSocketCommunicator() {}
@@ -32,7 +33,7 @@ class NewConnectionHandler {
         virtual void handleNewConnection(int file_descriptor) = 0;
 };
 
-class FrontendServer : NewConnectionHandler, ClientSocketCloseHandler {
+class FrontendServer : NewConnectionHandler, public ClientSocketCloseHandler {
     public:
         FrontendServer(ProcessingPipelineData* pipeline_data);
         ~FrontendServer();
@@ -51,6 +52,7 @@ class BackendServer : public RequestPipelineProcessor {
         BackendServer(EPollManager* v_epoll_manager, const char* v_backend_server_host_string, const char* v_backend_server_port_string);
         ~BackendServer();
         PipelineProcessor* processRequest(ProcessingPipelinePacket* data) override;
+        void request(string test);
         void setInitializationData(string name, InitializationData* data) override;
 
     private:

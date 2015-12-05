@@ -7,6 +7,8 @@
 #include "ConfigurationProcessor.h"
 #include "ProcessingPipeline.h"
 
+#include "Network.h"
+
 using namespace std;
 
 int main(int argc, char *argv[]) {
@@ -38,6 +40,9 @@ int main(int argc, char *argv[]) {
     PipelineProcessor* pipeline_modules;
 
     signal(SIGPIPE, SIG_IGN);
+
+    BackendServer* test = new BackendServer(epoll_manager, "localhost", "3000");
+    test->request("GET http://localhost:3000/ HTTP/1.0");
 
     vector<string>* ports = configuration_processor->getAllPorts();
     for (int i = 0; i < ports->size(); i++) {
