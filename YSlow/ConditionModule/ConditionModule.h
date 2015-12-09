@@ -6,7 +6,12 @@ class ConditionModule : public RequestPipelineProcessor {
         PipelineProcessor* processRequest(ProcessingPipelinePacket* data) override;
         void setInitializationData(string name, InitializationData* data) override;
     private:
-        PipelineProcessor* nextProcessor = nullptr;
+        bool testHeaderData(string header);
+        PipelineProcessor* onTrueProcessor = nullptr;
+        PipelineProcessor* onFalseProcessor = nullptr;
+        string headerField = "";
+        string matcher = "";
+        bool useRegex = false;
 };
 
 extern "C" {

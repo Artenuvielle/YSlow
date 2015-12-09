@@ -90,7 +90,7 @@ void LuaConfigurationProcessor::initializeProcessorList(EPollManager* v_epoll_ma
         delete pipeline_processors;
     }
     pipeline_processors = new map<int, PipelineProcessor*>();
-    LuaRef requested_pipeline_modules = getGlobal(L, "PipelineModules");
+    LuaRef requested_pipeline_modules = getGlobal(L, "PipelineProcessors");
     map<string, LuaRef>* requested_pipeline_modules_map = getLuaTable(requested_pipeline_modules, L);
     Logger::info << "Creating " << requested_pipeline_modules_map->size() << " instances of modules" << endl;
     createProcessors(requested_pipeline_modules_map, v_epoll_manager);

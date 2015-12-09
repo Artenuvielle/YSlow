@@ -132,11 +132,3 @@ PipelineProcessor* ProcessingPipelinePacket::getFirstResponsePipelineProcessor()
 
 ClientConnectionModule::ClientConnectionModule() {
 }
-
-void ClientConnectionModule::setPipelineData(ProcessingPipelineData* v_pipeline_data) {
-    pipeline_data = v_pipeline_data;
-}
-
-ProcessingPipelineData* ClientConnectionModule::getPipelineData() {
-    return pipeline_data;
-}

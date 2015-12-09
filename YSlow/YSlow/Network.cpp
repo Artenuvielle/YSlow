@@ -1,3 +1,9 @@
+#ifdef _MSC_VER
+#undef __cplusplus
+#define __cplusplus 201103L
+#endif
+
+#include <memory>
 #include <unistd.h>
 #include <stdlib.h>
 #include <string.h>

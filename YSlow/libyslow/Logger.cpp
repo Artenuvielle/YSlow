@@ -37,7 +37,7 @@ class LoggingStream : public ostream {
 };
 
 #ifdef DEBUG
-int Logger::logging_level = LOG_LEVEL_ALL;
+int Logger::logging_level = LOG_LEVEL_WARN;
 #else
 int Logger::logging_level = LOG_LEVEL_WARN;
 #endif

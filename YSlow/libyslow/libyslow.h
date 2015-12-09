@@ -109,14 +109,9 @@ class ProcessingPipelinePacket {
 class ClientConnectionModule {
     public:
         ClientConnectionModule();
-        void setPipelineData(ProcessingPipelineData* v_pipeline_data);
         virtual void handleRead(ConnectionModuleDataCarrier* socket, char* read_buffer, int bytes_read) = 0;
         virtual ProcessingPipelinePacket* getCompletePacket(ConnectionModuleDataCarrier* socket) = 0;
         virtual string handleWrite(ConnectionModuleDataCarrier* socket, ProcessingPipelinePacket* packet) = 0;
-    protected:
-        ProcessingPipelineData* getPipelineData();
-    private:
-        ProcessingPipelineData* pipeline_data;
 };
 
 // typedef to make it easier to set up our factory
