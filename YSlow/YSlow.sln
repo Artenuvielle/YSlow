@@ -33,6 +33,11 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "WebSocketConnectionModule",
 		{1AE536E7-8084-468C-B788-D0B38930EBE0} = {1AE536E7-8084-468C-B788-D0B38930EBE0}
 	EndProjectSection
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "RoundRobinModule", "RoundRobinModule\RoundRobinModule.vcxproj", "{C0D35464-F2A0-49C6-99F1-F1110AEF0407}"
+	ProjectSection(ProjectDependencies) = postProject
+		{1AE536E7-8084-468C-B788-D0B38930EBE0} = {1AE536E7-8084-468C-B788-D0B38930EBE0}
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -93,6 +98,14 @@ Global
 		{4FA3B339-70D6-4579-9751-DEC42F1B9742}.Release|x64.Build.0 = Release|x64
 		{4FA3B339-70D6-4579-9751-DEC42F1B9742}.Release|x86.ActiveCfg = Release|Win32
 		{4FA3B339-70D6-4579-9751-DEC42F1B9742}.Release|x86.Build.0 = Release|Win32
+		{C0D35464-F2A0-49C6-99F1-F1110AEF0407}.Debug|x64.ActiveCfg = Debug|x64
+		{C0D35464-F2A0-49C6-99F1-F1110AEF0407}.Debug|x64.Build.0 = Debug|x64
+		{C0D35464-F2A0-49C6-99F1-F1110AEF0407}.Debug|x86.ActiveCfg = Debug|Win32
+		{C0D35464-F2A0-49C6-99F1-F1110AEF0407}.Debug|x86.Build.0 = Debug|Win32
+		{C0D35464-F2A0-49C6-99F1-F1110AEF0407}.Release|x64.ActiveCfg = Release|x64
+		{C0D35464-F2A0-49C6-99F1-F1110AEF0407}.Release|x64.Build.0 = Release|x64
+		{C0D35464-F2A0-49C6-99F1-F1110AEF0407}.Release|x86.ActiveCfg = Release|Win32
+		{C0D35464-F2A0-49C6-99F1-F1110AEF0407}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

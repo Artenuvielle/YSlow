@@ -1,20 +1,20 @@
 <?xml version="1.0"?>
 <VisualGDBProjectSettings2 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
-  <ConfigurationName>Debug</ConfigurationName>
+  <ConfigurationName>Release</ConfigurationName>
   <Project xsi:type="com.visualgdb.project.linux">
     <CustomSourceDirectories>
       <Directories />
       <PathStyle>RemoteUnix</PathStyle>
     </CustomSourceDirectories>
     <BuildHost>
-      <HostName>192.168.143.129</HostName>
+      <HostName>192.168.143.128</HostName>
       <Transport>SSH</Transport>
       <UserName>rene</UserName>
     </BuildHost>
     <MainSourceTransferCommand>
       <SkipWhenRunningCommandList>false</SkipWhenRunningCommandList>
       <RemoteHost>
-        <HostName>192.168.143.129</HostName>
+        <HostName>192.168.143.128</HostName>
         <Transport>SSH</Transport>
         <UserName>rene</UserName>
       </RemoteHost>
@@ -31,7 +31,6 @@
       </FileMasks>
       <TransferNewFilesOnly>true</TransferNewFilesOnly>
       <IncludeSubdirectories>true</IncludeSubdirectories>
-      <SelectedDirectories />
     </MainSourceTransferCommand>
     <AllowChangingHostForMainCommands>false</AllowChangingHostForMainCommands>
     <SkipBuildIfNoSourceFilesChanged>false</SkipBuildIfNoSourceFilesChanged>
@@ -40,10 +39,9 @@
   </Project>
   <Build xsi:type="com.visualgdb.build.make">
     <MakeFilePathRelativeToSourceDir>Makefile</MakeFilePathRelativeToSourceDir>
-    <MakeConfigurationName>Debug</MakeConfigurationName>
-    <AdditionalMakeArguments />
+    <MakeConfigurationName>Release</MakeConfigurationName>
     <Toolchain>
-      <Name>Default GCC toolchain on 192.168.143.129</Name>
+      <Name>Default GCC toolchain on 192.168.143.128</Name>
       <UnixSystem>true</UnixSystem>
       <GCC>gcc</GCC>
       <GXX>g++</GXX>
@@ -74,11 +72,6 @@
     </Toolchain>
     <MakeCommandTemplate>
       <SkipWhenRunningCommandList>false</SkipWhenRunningCommandList>
-      <RemoteHost>
-        <HostName>192.168.143.129</HostName>
-        <Transport>SSH</Transport>
-        <UserName>rene</UserName>
-      </RemoteHost>
       <Command>make</Command>
       <WorkingDirectory>$(BuildDir)</WorkingDirectory>
       <Environment>
@@ -145,22 +138,7 @@
   </Debug>
   <CustomBuild>
     <PreBuildActions />
-    <PostBuildActions>
-      <CustomActionBase xsi:type="CommandLineAction">
-        <SkipWhenRunningCommandList>false</SkipWhenRunningCommandList>
-        <RemoteHost>
-          <HostName>192.168.143.129</HostName>
-          <Transport>SSH</Transport>
-          <UserName>rene</UserName>
-        </RemoteHost>
-        <Command>mkdir</Command>
-        <Arguments>-p ../YSlow/ModuleLibraries &amp;&amp; cp $(TargetPath) ../YSlow/ModuleLibraries</Arguments>
-        <WorkingDirectory>$(BuildDir)</WorkingDirectory>
-        <Environment>
-          <Records />
-        </Environment>
-      </CustomActionBase>
-    </PostBuildActions>
+    <PostBuildActions />
     <PreCleanActions />
     <PostCleanActions />
   </CustomBuild>

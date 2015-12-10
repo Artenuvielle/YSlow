@@ -20,7 +20,7 @@ void InitializationData::setInt(int v_data) {
 
 void InitializationData::setMap(map<string, InitializationData*>* v_data) {
     data_type = TYPE_MAP;
-    data = &v_data;
+    map_data = v_data;
 }
 
 void InitializationData::setProcessor(PipelineProcessor* v_data) {
@@ -62,7 +62,7 @@ map<string, InitializationData*>* InitializationData::getMap() {
     if (!isMap()) {
         return nullptr;
     }
-    return static_cast<map<string, InitializationData*>*>(data);
+    return static_cast<map<string, InitializationData*>*>(map_data);
 }
 
 PipelineProcessor* InitializationData::getProcessor() {

@@ -1,3 +1,5 @@
+#include <cstring>
+#include <cstdlib>
 #include <stdlib.h>
 #include <sstream>
 #include <dlfcn.h>
@@ -182,6 +184,8 @@ void LuaConfigurationProcessor::passProcessorParameters(map<string, luabridge::L
     }
 }
 
+vector<InitializationData*>* init_data_holder = new vector<InitializationData*>();
+
 InitializationData* LuaConfigurationProcessor::reinterpretData(LuaRef data) {
     InitializationData* common_data = new InitializationData();
     if (data.isString()) {
@@ -200,5 +204,6 @@ InitializationData* LuaConfigurationProcessor::reinterpretData(LuaRef data) {
             common_data->setMap(recursive_reinterpreted_data);
         }
     }
+    //init_data_holder->push_back(common_data);
     return common_data;
 }

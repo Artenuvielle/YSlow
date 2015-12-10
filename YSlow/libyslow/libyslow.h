@@ -48,7 +48,8 @@ class InitializationData {
             TYPE_PROCESSOR
         };
         InitializationDataType data_type;
-        void* data;
+        void* data = nullptr;
+        map<string, InitializationData*>* map_data = nullptr;
 };
 
 class PipelineProcessor {

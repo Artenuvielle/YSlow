@@ -187,7 +187,9 @@ class ClientSocket : public Socket, EPollEventHandler, public ConnectionModuleDa
             addWriteBufferEntry(new_entry);
         }
         void requestClose() {
-            onCloseEvent();
+            if (getSocketFileDescriptor() >= 0) {
+                onCloseEvent();
+            }
         }
         void setEventData(void* v_event_data) {
             event_data = v_event_data;
@@ -347,6 +349,7 @@ void FrontendServer::handleNewConnection(int file_descriptor) {
 
 void FrontendServer::handleClose(ClientSocket* socket) {
     delete socket;
+    socket = nullptr;
     Logger::info << "Frontend connection closed" << endl;
 }
 
@@ -389,8 +392,8 @@ class BackendResponseHandler : public ClientSocketReadHandler, public ClientSock
         }
         void handleClose(ClientSocket* socket) override {
             Logger::info << "Backend connection closed" << endl;
-            ProcessingPipelinePacket* packet_data = static_cast<ProcessingPipelinePacket*>(socket->getEventData());
-            packet_data->getClientSocket()->requestClose();
+            //ProcessingPipelinePacket* packet_data = static_cast<ProcessingPipelinePacket*>(socket->getEventData());
+            //packet_data->getClientSocket()->requestClose();
         }
 };
 
